@@ -10,30 +10,32 @@
     <div class="container">
         <h1>Resultados dos Exames</h1>
         
-        {% if exams %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome do Paciente</th>
-                        <th>Tipo de Exame</th>
-                        <th>Resultado</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for exam in exams %}
-                        <tr>
-                            <td>{{ exam.patient_name }}</td>
-                            <td>{{ exam.exam_type }}</td>
-                            <td>{{ exam.result }}</td>
-                            <td>
-                                <a href="{{ url_for('edit_exam', exam_id=exam.id) }}">Editar</a> | 
-                                <a href="{{ url_for('delete_exam', exam_id=exam.id) }}" onclick="return confirm('Tem certeza que deseja excluir este exame?')">Excluir</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% if grouped_exams %}
+            <div class="results-container">
+                {% for patient_name, exams in grouped_exams.items() %}
+                    <div class="exam-card">
+                        <h3>{{ patient_name }}</h3>
+                        {% for exam in exams %}
+                            <div class="exam-details">
+                                <ul>
+                                    <li><strong>Categoria:</strong> {{ exam.category }}</li>
+                                    <li><strong>Subcategoria:</strong> {{ exam.subcategory }}</li>
+                                    <li><strong>Resultado Geral:</strong> {{ exam.result }}</li>
+                                    {% if exam.details %}
+                                        {% for key, value in exam.details.items() %}
+                                            <li><strong>{{ key }}:</strong> {{ value }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                                <div class="actions">
+                                    <a href="{{ url_for('edit_exam', exam_id=exam.id) }}">Editar</a>
+                                    <a href="{{ url_for('delete_exam', exam_id=exam.id) }}" onclick="return confirm('Tem certeza que deseja excluir este exame?')">Excluir</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
             <p>Não há exames registrados ainda.</p>
         {% endif %}
@@ -41,5 +43,4 @@
         <a href="/">Registrar Novo Exame</a>
     </div>
 </body>
-</
-    
+</html>
