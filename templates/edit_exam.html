@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Exame</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Exame</h1>
+        
+        <form method="POST">
+            <label for="patient_name">Nome do Paciente:</label>
+            <input type="text" id="patient_name" name="patient_name" value="{{ exam.patient_name }}" required>
+            
+            <label for="exam_type">Tipo de Exame:</label>
+            <input type="text" id="exam_type" name="exam_type" value="{{ exam.exam_type }}" required>
+            
+            <label for="result">Resultado:</label>
+            <input type="text" id="result" name="result" value="{{ exam.result }}" required>
+            
+            <button type="submit">Atualizar Exame</button>
+        </form>
+        
+        <a href="{{ url_for('results') }}">Voltar para os Resultados</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Exame</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Registrar Novo Exame</h1>
+
+        <form action="/submit" method="POST">
+            <label for="patient_name">Nome do Paciente:</label>
+            <input type="text" id="patient_name" name="patient_name" required>
+            
+            <label for="exam_type">Tipo de Exame:</label>
+            <select id="exam_type" name="exam_type" required>
+                <option value="" disabled selected>Selecione o tipo de exame</option>
+                {% for exam in exam_types %}
+                    <option value="{{ exam }}">{{ exam }}</option>
+                {% endfor %}
+            </select>
+            
+            <label for="result">Resultado:</label>
+            <input type="text" id="result" name="result" required>
+            
+            <button type="submit">Registrar Exame</button>
+        </form>
+        
+        <a href="/results">Ver Resultados</a>
+    </div>
+</body>
+</html>
+    
