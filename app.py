@@ -1,13 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from models import db, Exam, Category, SubCategory, User
+from models import db, User, Exam, Category, SubCategory
 from collections import defaultdict
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exams.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'sua_chave_secreta_aqui'  # Chave secreta para sessões
+app.secret_key = 'sua_chave_secreta_aqui'
 
 # Inicializa o banco de dados
 db.init_app(app)
@@ -21,6 +20,16 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Função para criar o admin automaticamente
+def create_admin():
+    admin = User.query.filter_by(username='admin').first()
+    if not admin:
+        admin = User(username='admin', is_admin=True)
+        admin.set_password('admin123')  # Senha padrão para o admin
+        db.session.add(admin)
+        db.session.commit()
+        print("Admin criado com sucesso!")
+
 # Lista de tipos de exames pré-definidos (categorias)
 EXAM_TYPES = ['Hemograma', 'Ultrassonografia', 'Raio-X', 'Tomografia', 'Eletrocardiograma']
 
@@ -33,44 +42,48 @@ EXAM_SUBCATEGORIES = {
     'Eletrocardiograma': ['Eletrocardiograma de Repouso', 'Eletrocardiograma de Esforço']
 }
 
-EXAM_SUBCATEGORY_FIELDS = {
-    "Leucócitos": ["Número total de leucócitos", "Leucograma diferencial"],
-    "Plaquetas": ["Contagem de plaquetas", "Volume plaquetário médio"],
-    "Hemograma Completo": ["Hemoglobina", "Hematócrito", "Contagem de glóbulos vermelhos"],
-    # Adicione mais subcategorias e campos conforme necessário
-}
-
+# Rota para a raiz (/) - Agora renderiza o que era home.html
 @app.route('/')
-@login_required
-def index():
-    return render_template('index.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
+def root():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))  # Redireciona para a página inicial (home)
+    else:
+        return redirect(url_for('login'))
 
+# Rota para a página inicial (home) - Agora renderiza o que era home.html
+@app.route('/home')
+@login_required
+def home():
+    return render_template('index.html')  # Renderiza o que era home.html
+
+# Rota para a página de exame (exame.html) - Agora renderiza o que era index.html
+@app.route('/exame')
+@login_required
+def exame():
+    return render_template('exame.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)  # Passa exam_subcategories
+
+# Rota para login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            login_user(user)
-            flash('Login bem-sucedido!')
-            return redirect(url_for('index'))
+        
+        if user:  # Verifica se o usuário existe
+            if user.check_password(password):  # Verifica a senha
+                login_user(user)
+                flash('Login bem-sucedido!', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Senha incorreta.', 'error')
         else:
-            flash('Usuário ou senha inválidos')
+            flash('Conta inexistente.', 'error')  # Mensagem para conta inexistente
     return render_template('login.html')
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
+# Rota para registro
 @app.route('/register', methods=['GET', 'POST'])
-@login_required
 def register():
-    if not current_user.is_admin:
-        return redirect(url_for('index'))
-    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -81,11 +94,31 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        flash('Usuário registrado com sucesso!')
-        return redirect(url_for('index'))
+        flash('Usuário registrado com sucesso!', 'success')
+        return redirect(url_for('login'))
     
     return render_template('register.html')
 
+# Rota para logout
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Você foi desconectado.', 'success')
+    return redirect(url_for('login'))
+
+# Rota para gerar etiqueta
+@app.route('/generate_label', methods=['GET', 'POST'])
+@login_required
+def generate_label():
+    if request.method == 'POST':
+        patient_name = request.form['patient_name']
+        exam_type = request.form['exam_type']
+        # Passa os dados para o template label.html
+        return render_template('label.html', patient_name=patient_name, exam_type=exam_type)
+    return render_template('generate_label.html', exam_types=EXAM_TYPES)
+
+# Rota para registrar exame
 @app.route('/submit', methods=['POST'])
 @login_required
 def submit_exam():
@@ -123,6 +156,7 @@ def submit_exam():
     db.session.commit()
     return redirect(url_for('results'))
 
+# Rota para exibir todos os resultados de exames
 @app.route('/results')
 @login_required
 def results():
@@ -139,6 +173,7 @@ def results():
         })
     return render_template('result.html', grouped_exams=grouped_exams)
 
+# Rota para editar um exame
 @app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
 def edit_exam(exam_id):
@@ -161,6 +196,7 @@ def edit_exam(exam_id):
     
     return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
+# Rota para excluir um exame
 @app.route('/delete/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
 def delete_exam(exam_id):
@@ -169,12 +205,8 @@ def delete_exam(exam_id):
     db.session.commit()
     return redirect(url_for('results'))
 
-@app.route('/get_subcategories/<int:category_id>')
-def get_subcategories(category_id):
-    subcategories = SubCategory.query.filter_by(category_id=category_id).all()
-    return render_template('subcategories_options.html', subcategories=subcategories)
-
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        db.create_all()  # Cria as tabelas no banco de dados
+        create_admin()   # Cria o admin automaticamente
     app.run(debug=True)

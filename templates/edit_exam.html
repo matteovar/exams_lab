@@ -3,125 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Exame</title>
-    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/mainpage.css') }}">
-    <script>
-        // Dados dos campos específicos para cada subcategoria
-        const subcategoryFields = {
-            "Leucócitos": ["Número total de leucócitos", "Leucograma diferencial"],
-            "Plaquetas": ["Contagem de plaquetas", "Volume plaquetário médio"],
-            "Hemograma Completo": ["Hemoglobina", "Hematócrito", "Contagem de glóbulos vermelhos"],
-            // Adicione mais subcategorias e campos conforme necessário
-        };
-
-        // Converte exam.details para JSON e passa para o JavaScript
-        const examDetails = JSON.parse('{{ exam.details|tojson|safe }}');
-
-        // Função para carregar subcategorias dinamicamente
-        function loadSubcategories() {
-            var category = document.getElementById("category").value;
-            var subcategorySelect = document.getElementById("subcategory");
-            
-            // Limpa as opções atuais
-            subcategorySelect.innerHTML = '<option value="" disabled selected>Selecione a subcategoria</option>';
-            
-            // Carrega as subcategorias correspondentes
-            if (category) {
-                var subcategories = JSON.parse('{{ exam_subcategories|tojson|safe }}');
-                subcategories[category].forEach(function(subcat) {
-                    var option = document.createElement("option");
-                    option.value = subcat;
-                    option.text = subcat;
-                    subcategorySelect.appendChild(option);
-                });
-            }
-        }
-
-        // Função para mostrar campos específicos da subcategoria
-        function showFields() {
-            var subcategory = document.getElementById("subcategory").value;
-            var fieldsContainer = document.getElementById("fields-container");
-            
-            // Limpa os campos anteriores
-            fieldsContainer.innerHTML = "";
-            
-            // Mostra os campos específicos da subcategoria selecionada
-            if (subcategory && subcategoryFields[subcategory]) {
-                subcategoryFields[subcategory].forEach(function(field) {
-                    var label = document.createElement("label");
-                    label.textContent = field + ":";
-                    label.setAttribute("for", field.toLowerCase().replace(/ /g, "_"));
-                    
-                    var input = document.createElement("input");
-                    input.type = "text";
-                    input.id = field.toLowerCase().replace(/ /g, "_");
-                    input.name = field.toLowerCase().replace(/ /g, "_");
-                    input.required = true;
-                    
-                    // Preenche os campos com os valores existentes (se houver)
-                    const fieldKey = field.toLowerCase().replace(/ /g, "_");
-                    if (examDetails && examDetails[fieldKey]) {
-                        input.value = examDetails[fieldKey];
-                    }
-                    
-                    fieldsContainer.appendChild(label);
-                    fieldsContainer.appendChild(input);
-                    fieldsContainer.appendChild(document.createElement("br"));
-                });
-            }
-        }
-
-        // Carrega os campos ao carregar a página
-        window.onload = function() {
-            loadSubcategories();
-            showFields();
-        };
-    </script>
+    <title>Registrar Exame</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <!-- Biblioteca para gerar código de barras -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="fixed-header">
         <h1>Registrar Novo Exame</h1>
-        
-        <div class="form-container">
-            <form action="/submit" method="POST">
-                <div class="form-group">
-                    <label for="patient_name">Nome do Paciente:</label>
-                    <input type="text" id="patient_name" name="patient_name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="category">Categoria:</label>
-                    <select id="category" name="category" onchange="loadSubcategories()" required>
-                        <option value="" disabled selected>Selecione a categoria</option>
-                        {% for exam in exam_types %}
-                            <option value="{{ exam }}">{{ exam }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="subcategory">Subcategoria:</label>
-                    <select id="subcategory" name="subcategory" onchange="showFields()" required>
-                        <option value="" disabled selected>Selecione a subcategoria</option>
-                    </select>
-                </div>
-                
-                <div class="dynamic-fields" id="fields-container">
-                    <!-- Campos dinâmicos serão adicionados aqui -->
-                </div>
-                
-                <div class="form-group">
-                    <label for="result">Resultado Geral:</label>
-                    <input type="text" id="result" name="result" required>
-                </div>
-                
-                <div class="form-group">
-                    <button type="submit">Registrar Exame</button>
-                </div>
-            </form>
-        </div>
-        
-        <a href="/results">Ver Resultados</a>
+        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
     </div>
+
+    <div class="home-container">
+        <!-- Botão para gerar etiqueta -->
+        <button onclick="openLabelModal()" class="btn-generate-label">Gerar Etiqueta</button>
+
+        <!-- Modal para gerar etiqueta -->
+        <div id="labelModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeLabelModal()">&times;</span>
+                <h2>Gerar Etiqueta</h2>
+                <form id="labelForm">
+                    <div class="form-group">
+                        <label for="patient_name_label">Nome do Paciente:</label>
+                        <input type="text" id="patient_name_label" name="patient_name_label" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam_type_label">Tipo de Exame:</label>
+                        <select id="exam_type_label" name="exam_type_label" required>
+                            <option value="" disabled selected>Selecione o tipo de exame</option>
+                            {% for exam in exam_types %}
+                                <option value="{{ exam }}">{{ exam }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button" onclick="generateLabel()">Gerar Etiqueta</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Área para exibir a etiqueta gerada -->
+        <div id="labelPreview" class="label-preview">
+            <h3>Etiqueta Gerada</h3>
+            <div id="barcode"></div>
+            <p id="labelPatientName"></p>
+            <p id="labelExamType"></p>
+            <button onclick="printLabel()">Imprimir Etiqueta</button>
+        </div>
+
+        <!-- Botão de Voltar -->
+        <button onclick="goBack()" class="btn-back">Voltar</button>
+    </div>
+
+    <script>
+        // Funções para abrir/fechar o modal
+        function openLabelModal() {
+            document.getElementById('labelModal').style.display = 'block';
+        }
+
+        function closeLabelModal() {
+            document.getElementById('labelModal').style.display = 'none';
+        }
+
+        // Função para gerar a etiqueta
+        function generateLabel() {
+            const patientName = document.getElementById('patient_name_label').value;
+            const examType = document.getElementById('exam_type_label').value;
+
+            if (!patientName || !examType) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
+            // Exibe as informações na etiqueta
+            document.getElementById('labelPatientName').textContent = `Paciente: ${patientName}`;
+            document.getElementById('labelExamType').textContent = `Exame: ${examType}`;
+
+            // Gera o código de barras
+            JsBarcode("#barcode", `${patientName}-${examType}`, {
+                format: "CODE128",
+                displayValue: true,
+                fontSize: 16,
+            });
+
+            // Exibe a área de pré-visualização da etiqueta
+            document.getElementById('labelPreview').style.display = 'block';
+
+            // Fecha o modal
+            closeLabelModal();
+        }
+
+        // Função para imprimir a etiqueta
+        function printLabel() {
+            window.print();
+        }
+
+        // Função para voltar à página anterior
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>

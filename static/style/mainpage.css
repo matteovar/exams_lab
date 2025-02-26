@@ -228,3 +228,306 @@ button:hover {
 .btn-add-exam:hover {
     background-color: #45a049; /* Verde mais escuro ao passar o mouse */
 }
+
+/* Estilos para as páginas de login e registro */
+.login-container, .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.login-form, .register-form {
+    max-width: 400px;
+    width: 100%;
+    padding: 30px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.login-form h1, .register-form h1 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.login-form label, .register-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: left;
+}
+
+.login-form input, .register-form input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.login-form input:focus, .register-form input:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.login-form button, .register-form button {
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.login-form button:hover, .register-form button:hover {
+    background-color: #2980b9;
+}
+
+.login-form .register-link, .register-form .login-link {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.login-form .register-link a, .register-form .login-link a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.login-form .register-link a:hover, .register-form .login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para mensagens flash */
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.flash-messages div {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    opacity: 1;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Animação para desaparecer as mensagens */
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.flash-messages div.fade-out {
+    animation: fadeOutUp 0.5s ease forwards;
+}
+
+/* Estilo para o botão de logout */
+.btn-logout {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #c0392b;
+}
+
+/* Estilos para o modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #333;
+}
+
+/* Estilos para a área de pré-visualização da etiqueta */
+.label-preview {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+#barcode {
+    margin: 20px 0;
+}
+
+.btn-print {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-print:hover {
+    background-color: #0056b3;
+}
+
+.label-preview h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.label-preview p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.label-preview button {
+    margin-top: 20px;
+}
+
+/* Estilos para o botão de gerar etiqueta */
+.btn-generate-label {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.btn-generate-label:hover {
+    background-color: #45a049;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.btn-option {
+    background-color: #3498db;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 18px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-option:hover {
+    background-color: #2980b9;
+}
+
+/* Estilos para a área de pré-visualização da etiqueta */
+.label-preview {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.label-preview h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.label-preview p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.label-preview button {
+    margin-top: 20px;
+}   
+
+/* Estilo para o botão de voltar */
+.btn-back {
+    background-color: #6c757d; /* Cinza */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.btn-back:hover {
+    background-color: #5a6268; /* Cinza mais escuro ao passar o mouse */
+}

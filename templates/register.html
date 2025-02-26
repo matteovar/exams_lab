@@ -3,30 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Usuário</title>
+    <title>Registrar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <script>
+        // Função para esconder as mensagens após 5 segundos
+        function hideFlashMessages() {
+            const flashMessages = document.querySelectorAll('.flash-messages div');
+            flashMessages.forEach(message => {
+                setTimeout(() => {
+                    message.classList.add('fade-out'); // Aplica a animação de desaparecimento
+                    setTimeout(() => {
+                        message.remove(); // Remove a mensagem do DOM após a animação
+                    }, 500); // Tempo da animação (0.5 segundos)
+                }, 5000); // Tempo de exibição da mensagem (5 segundos)
+            });
+        }
+
+        // Executa a função ao carregar a página
+        window.onload = function() {
+            hideFlashMessages();
+        };
+    </script>
 </head>
 <body>
-    <h1>Registrar Usuário</h1>
-    <form method="POST">
-        <label for="username">Usuário:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Senha:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <label for="is_admin">Admin:</label>
-        <input type="checkbox" id="is_admin" name="is_admin">
-        <br>
-        <button type="submit">Registrar</button>
-    </form>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+    <!-- Mensagens flash (fora da box) -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="register-container">
+        <div class="register-form">
+            <h1>Registrar</h1>
+            <form method="POST">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required>
+                <label for="is_admin">Admin:</label>
+                <input type="checkbox" id="is_admin" name="is_admin">
+                <button type="submit">Registrar</button>
+            </form>
+            <div class="login-link">
+                Já tem uma conta? <a href="{{ url_for('login') }}">Faça login</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

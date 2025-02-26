@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados dos Exames</title>
-    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
 </head>
 <body>
     <div class="fixed-header">
         <h1>Resultados dos Exames</h1>
+        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
     </div>
 
     <div class="container">
@@ -52,6 +53,13 @@
         {% else %}
             <p>Não há exames registrados ainda.</p>
         {% endif %}
+        <button onclick="goBack()" class="btn-back">Voltar</button>
     </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>

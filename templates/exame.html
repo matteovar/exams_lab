@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Exame</title>
+    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <script>
+        // Dados dos campos específicos para cada subcategoria
+        const subcategoryFields = {
+            "Leucócitos": ["Número total de leucócitos", "Leucograma diferencial"],
+            "Plaquetas": ["Contagem de plaquetas", "Volume plaquetário médio"],
+            "Hemograma Completo": ["Hemoglobina", "Hematócrito", "Contagem de glóbulos vermelhos"],
+            // Adicione mais subcategorias e campos conforme necessário
+        };
+
+        // Função para carregar subcategorias dinamicamente
+        function loadSubcategories() {
+            var category = document.getElementById("category").value;
+            var subcategorySelect = document.getElementById("subcategory");
+            
+            // Limpa as opções atuais
+            subcategorySelect.innerHTML = '<option value="" disabled selected>Selecione a subcategoria</option>';
+            
+            // Carrega as subcategorias correspondentes
+            if (category) {
+                var subcategories = JSON.parse('{{ exam_subcategories|tojson|safe }}');
+                subcategories[category].forEach(function(subcat) {
+                    var option = document.createElement("option");
+                    option.value = subcat;
+                    option.text = subcat;
+                    subcategorySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Função para mostrar campos específicos da subcategoria
+        function showFields() {
+            var subcategory = document.getElementById("subcategory").value;
+            var fieldsContainer = document.getElementById("fields-container");
+            
+            // Limpa os campos anteriores
+            fieldsContainer.innerHTML = "";
+            
+            // Mostra os campos específicos da subcategoria selecionada
+            if (subcategory && subcategoryFields[subcategory]) {
+                subcategoryFields[subcategory].forEach(function(field) {
+                    var label = document.createElement("label");
+                    label.textContent = field + ":";
+                    label.setAttribute("for", field.toLowerCase().replace(/ /g, "_"));
+                    
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.id = field.toLowerCase().replace(/ /g, "_");
+                    input.name = field.toLowerCase().replace(/ /g, "_");
+                    input.required = true;
+                    
+                    fieldsContainer.appendChild(label);
+                    fieldsContainer.appendChild(input);
+                    fieldsContainer.appendChild(document.createElement("br"));
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="fixed-header">
+        <h1>Registrar Novo Exame</h1>
+    </div>
+
+    <div class="home-container">
+        <div class="form-container">
+            <form action="/submit" method="POST">
+                <div class="form-group">
+                    <label for="patient_name">Nome do Paciente:</label>
+                    <input type="text" id="patient_name" name="patient_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Categoria:</label>
+                    <select id="category" name="category" onchange="loadSubcategories()" required>
+                        <option value="" disabled selected>Selecione a categoria</option>
+                        {% for exam in exam_types %}
+                            <option value="{{ exam }}">{{ exam }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subcategory">Subcategoria:</label>
+                    <select id="subcategory" name="subcategory" onchange="showFields()" required>
+                        <option value="" disabled selected>Selecione a subcategoria</option>
+                    </select>
+                </div>
+                
+                <div class="dynamic-fields" id="fields-container">
+                    <!-- Campos dinâmicos serão adicionados aqui -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="result">Resultado Geral:</label>
+                    <input type="text" id="result" name="result" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit">Registrar Exame</button>
+                </div>
+            </form>
+        </div>
+        <button onclick="goBack()" class="btn-back">Voltar</button>
+        
+        <a href="/results">Ver Resultados</a>
+        
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+        </script>
+    </div>
+</body>
+</html>
