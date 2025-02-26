@@ -4,26 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados dos Exames</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/mainpage.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="fixed-header">
         <h1>Resultados dos Exames</h1>
-        
+    </div>
+
+    <div class="container">
+        <!-- Botão "Adicionar Novo Exame" -->
+        <div class="add-exam-button">
+            <a href="/" class="btn-add-exam">Adicionar Novo Exame</a>
+        </div>
+
+        <!-- Lista de resultados -->
         {% if grouped_exams %}
             <div class="results-container">
-                {% for patient_name, exams in grouped_exams.items() %}
+                {% for patient_name, patient_data in grouped_exams.items() %}
                     <div class="exam-card">
                         <h3>{{ patient_name }}</h3>
-                        {% for exam in exams %}
+                        <div class="category">
+                            <strong>Categoria:</strong> {{ patient_data.category }}
+                        </div>
+                        {% for exam in patient_data.exams %}
                             <div class="exam-details">
                                 <ul>
-                                    <li><strong>Categoria:</strong> {{ exam.category }}</li>
                                     <li><strong>Subcategoria:</strong> {{ exam.subcategory }}</li>
                                     <li><strong>Resultado Geral:</strong> {{ exam.result }}</li>
                                     {% if exam.details %}
                                         {% for key, value in exam.details.items() %}
-                                            <li><strong>{{ key }}:</strong> {{ value }}</li>
+                                            <li>
+                                                <strong>{{ key.replace('_', ' ').title() }}:</strong> 
+                                                {{ value }}
+                                            </li>
                                         {% endfor %}
                                     {% endif %}
                                 </ul>
@@ -39,8 +52,6 @@
         {% else %}
             <p>Não há exames registrados ainda.</p>
         {% endif %}
-        
-        <a href="/">Registrar Novo Exame</a>
     </div>
 </body>
 </html>

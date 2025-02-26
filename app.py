@@ -1,15 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for
-from models import db, Exam, Category, SubCategory
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from models import db, Exam, Category, SubCategory, User
 from collections import defaultdict
 
 app = Flask(__name__)
-
-# Configuração do banco de dados (SQLite)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exams.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'sua_chave_secreta_aqui'  # Chave secreta para sessões
 
 # Inicializa o banco de dados
 db.init_app(app)
+
+# Configuração do Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # Lista de tipos de exames pré-definidos (categorias)
 EXAM_TYPES = ['Hemograma', 'Ultrassonografia', 'Raio-X', 'Tomografia', 'Eletrocardiograma']
@@ -31,30 +41,67 @@ EXAM_SUBCATEGORY_FIELDS = {
 }
 
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Login bem-sucedido!')
+            return redirect(url_for('index'))
+        else:
+            flash('Usuário ou senha inválidos')
+    return render_template('login.html')
 
-# Rota para receber e processar os dados do exame
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route('/register', methods=['GET', 'POST'])
+@login_required
+def register():
+    if not current_user.is_admin:
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        is_admin = 'is_admin' in request.form
+        
+        user = User(username=username, is_admin=is_admin)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Usuário registrado com sucesso!')
+        return redirect(url_for('index'))
+    
+    return render_template('register.html')
+
 @app.route('/submit', methods=['POST'])
+@login_required
 def submit_exam():
-    # Coleta os dados do formulário
     patient_name = request.form['patient_name']
     category = request.form['category']
     subcategory = request.form['subcategory']
     result = request.form.get('result', '')
 
-    # Coleta os campos dinâmicos
     details = {}
     for key, value in request.form.items():
         if key not in ['patient_name', 'category', 'subcategory', 'result']:
             details[key] = value
 
-    # Verifica se o paciente já existe
     existing_patient = Exam.query.filter_by(patient_name=patient_name).first()
 
     if existing_patient:
-        # Se o paciente já existe, cria um novo exame para ele
         new_exam = Exam(
             patient_name=patient_name,
             category=category,
@@ -64,7 +111,6 @@ def submit_exam():
         )
         db.session.add(new_exam)
     else:
-        # Se o paciente não existe, cria um novo paciente com o primeiro exame
         new_exam = Exam(
             patient_name=patient_name,
             category=category,
@@ -74,37 +120,36 @@ def submit_exam():
         )
         db.session.add(new_exam)
 
-    db.session.commit()  # Salva no banco
-
-    # Após inserir o exame, redireciona para a página de resultados
+    db.session.commit()
     return redirect(url_for('results'))
 
-# Rota para exibir todos os resultados de exames
 @app.route('/results')
+@login_required
 def results():
-    # Recupera todos os exames do banco de dados
     exams = Exam.query.all()
-
-    # Agrupa os exames por paciente
-    grouped_exams = defaultdict(list)
+    grouped_exams = defaultdict(lambda: {"category": None, "exams": []})
     for exam in exams:
-        grouped_exams[exam.patient_name].append(exam)
-
-    # Passa os exames agrupados para o template 'result.html'
+        if not grouped_exams[exam.patient_name]["category"]:
+            grouped_exams[exam.patient_name]["category"] = exam.category
+        grouped_exams[exam.patient_name]["exams"].append({
+            "id": exam.id,
+            "subcategory": exam.subcategory,
+            "result": exam.result,
+            "details": exam.details
+        })
     return render_template('result.html', grouped_exams=grouped_exams)
 
 @app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
+@login_required
 def edit_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
 
     if request.method == 'POST':
-        # Atualiza os dados do exame
         exam.patient_name = request.form['patient_name']
         exam.category = request.form['category']
         exam.subcategory = request.form['subcategory']
         exam.result = request.form['result']
         
-        # Coleta os campos dinâmicos
         details = {}
         for key, value in request.form.items():
             if key not in ['patient_name', 'category', 'subcategory', 'result']:
@@ -116,16 +161,14 @@ def edit_exam(exam_id):
     
     return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
-# Rota para excluir um exame
 @app.route('/delete/<int:exam_id>', methods=['GET', 'POST'])
+@login_required
 def delete_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     db.session.delete(exam)
     db.session.commit()
-    
     return redirect(url_for('results'))
 
-# Rota para obter subcategorias via AJAX
 @app.route('/get_subcategories/<int:category_id>')
 def get_subcategories(category_id):
     subcategories = SubCategory.query.filter_by(category_id=category_id).all()

@@ -1,0 +1,230 @@
+/* Estilos gerais */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    padding-top: 80px; /* Aumente o espaçamento para evitar sobreposição */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+    margin-top: 10px; /* Reduz o espaçamento acima do link */
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px; /* Reduz o espaçamento acima do botão */
+    margin-bottom: 10px; /* Adiciona espaçamento abaixo do botão */
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Estilos para o título fixo */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Estilos para a página inicial */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 20px;
+}
+
+.home-container .form-container {
+    max-width: 800px; /* Define a largura máxima da "box" */
+    width: 90%; /* Faz a "box" ocupar 90% da largura da tela */
+    min-height: 400px; /* Define uma altura mínima */
+    padding: 30px; /* Aumenta o espaçamento interno */
+    margin: 0 auto; /* Centraliza a "box" na tela */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para os campos do formulário */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.form-group input, .form-group select {
+    width: 100%; /* Faz os campos ocuparem 100% da largura do container */
+    padding: 12px; /* Aumenta o espaçamento interno dos campos */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 15px; /* Aumenta o espaçamento entre os campos */
+}
+
+.form-group input:focus, .form-group select:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.dynamic-fields {
+    margin-top: 20px;
+}
+
+.dynamic-fields label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.dynamic-fields input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+/* Estilos para a página de resultados */
+.results-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os cartões quebrem para a próxima linha se não couberem */
+    gap: 20px; /* Espaçamento entre os cartões */
+    padding: 20px;
+    justify-content: flex-start; /* Alinha os cartões à esquerda */
+}
+
+.exam-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(33.33% - 20px); /* Define a largura dos cartões (3 por linha) */
+    margin-bottom: 20px; /* Espaçamento entre as linhas de cartões */
+    word-wrap: break-word;
+}
+
+.exam-card h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+/* Estilos para a categoria */
+.category {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.exam-details {
+    margin-top: 15px;
+}
+
+.exam-details ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.exam-details ul li {
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    word-break: break-word;
+}
+
+.exam-details ul li strong {
+    color: #2c3e50;
+    display: inline-block;
+    width: 150px;
+}
+
+.actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.actions a {
+    margin-right: 10px;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.actions a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para o botão "Adicionar Novo Exame" */
+.add-exam-button {
+    text-align: right; /* Alinha o botão à direita */
+    margin-bottom: 20px; /* Espaçamento abaixo do botão */
+    margin-top: 20px; /* Adiciona espaçamento acima do botão */
+}
+
+.btn-add-exam {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-add-exam:hover {
+    background-color: #45a049; /* Verde mais escuro ao passar o mouse */
+}
