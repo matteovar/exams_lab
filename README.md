@@ -6,4 +6,5 @@
     - ```pip install flask flask_sqlalchemy```
  
 - Rodar o codigo
-    - ```python app.py```
+    - ```flask run``
+
