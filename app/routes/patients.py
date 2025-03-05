@@ -1,4 +1,3 @@
-# app/routes/patients.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import Patient, db
 from app.services.patient_service import create_patient
@@ -17,6 +16,10 @@ def patient_form():
         exams = request.form.getlist('exams')
 
         create_patient(full_name, street, phone, email, cpf, exams)
-        return redirect(url_for('patients.home'))
+        return redirect(url_for('exams.home'))  # Redireciona para 'exams.home'
 
     return render_template('patient_form.html', exam_types=EXAM_TYPES)
+
+@patients_bp.route('/home')  # Opcional: Defina a rota 'patients.home'
+def home():
+    return render_template('home.html')  # Substitua 'home.html' pelo template desejado

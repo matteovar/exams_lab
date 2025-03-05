@@ -1,5 +1,5 @@
-# app/services/patient_service.py
-from app.models import Patient, db
+from app import db  # Importe a instância db do app/__init__.py
+from app.models import Patient
 
 def create_patient(full_name, street, phone, email, cpf, exams):
     new_patient = Patient(

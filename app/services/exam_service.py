@@ -1,5 +1,5 @@
-# app/services/exam_service.py
-from app.models import Exam, db
+from app import db  # Importe a instância db do app/__init__.py
+from app.models import Exam
 
 def create_exam(patient_name, category, subcategory, result, details):
     new_exam = Exam(

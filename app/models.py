@@ -1,8 +1,6 @@
 # app/models.py
-from flask_sqlalchemy import SQLAlchemy
+from app import db  # Importe a instância db do app/__init__.py
 from sqlalchemy.dialects.postgresql import JSON
-
-db = SQLAlchemy()
 
 class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
