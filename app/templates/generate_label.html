@@ -9,11 +9,10 @@
 <body>
     <div class="fixed-header">
         <h1>Gerar Etiqueta</h1>
-        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
     </div>
 
     <div class="home-container">
-        <form action="{{ url_for('generate_label') }}" method="POST">
+        <form action="{{ url_for('labels.generate_label_route') }}" method="POST">
             <div class="form-group">
                 <label for="patient_name">Nome do Paciente:</label>
                 <input type="text" id="patient_name" name="patient_name" required>
@@ -29,13 +28,6 @@
             </div>
             <button type="submit">Gerar Etiqueta</button>
         </form>
-        <button onclick="goBack()" class="btn-back">Voltar</button>
     </div>
-
-    <script>
-        function goBack() {
-            window.history.back();
-        }
-    </script>
 </body>
 </html>

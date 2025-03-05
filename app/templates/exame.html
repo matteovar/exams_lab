@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Exame</title>
+    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <script src="{{ url_for('static', filename='js/ExamForm.js') }}"></script>
+</head>
+<body>
+    <div class="fixed-header">
+        <h1>Registrar Novo Exame</h1>
+    </div>
+
+    <div class="home-container">
+        <div class="form-container">
+            <form action="/submit" method="POST">
+                <div class="form-group">
+                    <label for="patient_name">Nome do Paciente:</label>
+                    <input type="text" id="patient_name" name="patient_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Categoria:</label>
+                    <select id="category" name="category" onchange="loadSubcategories()" required>
+                        <option value="" disabled selected>Selecione a categoria</option>
+                        {% for exam in exam_types %}
+                            <option value="{{ exam }}">{{ exam }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subcategory">Subcategoria:</label>
+                    <select id="subcategory" name="subcategory" onchange="showFields()" required>
+                        <option value="" disabled selected>Selecione a subcategoria</option>
+                    </select>
+                </div>
+                
+                <div class="dynamic-fields" id="fields-container">
+                    <!-- Campos dinâmicos serão adicionados aqui -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="result">Resultado Geral:</label>
+                    <input type="text" id="result" name="result" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit">Registrar Exame</button>
+                </div>
+            </form>
+        </div>
+        <button onclick="goBack()" class="btn-back">Voltar</button>
+        
+        <a href="/results">Ver Resultados</a>
+        
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+        </script>
+    </div>
+</body>
+</html>

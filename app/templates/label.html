@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta Gerada</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <!-- Biblioteca para gerar código de barras -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <div class="fixed-header">
+        <h1>Etiqueta Gerada</h1>
+    </div>
+
+    <div class="home-container">
+        <!-- Área para exibir a etiqueta gerada -->
+        <div id="labelPreview" class="label-preview">
+            <h3>Etiqueta Gerada</h3>
+            <svg id="barcode"></svg> <!-- Elemento SVG para o código de barras -->
+            <p id="labelPatientName">Paciente: {{ patient_name }}</p>
+            <p id="labelExamType">Exame: {{ exam_type }}</p>
+            <button onclick="printLabel()">Imprimir Etiqueta</button>
+        </div>
+
+        <!-- Botão de Voltar -->
+        <button onclick="goBack()" class="btn-back">Voltar</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/label.js') }}"></script>
+</body>
+</html>
