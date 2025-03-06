@@ -5,7 +5,75 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    padding-top: 80px; /* Espaçamento para evitar sobreposição com o cabeçalho fixo */
+    padding-top: 80px; /* Aumente o espaçamento para evitar sobreposição */
+}
+
+/* Menu Suspenso */
+.sidebar {
+    width: 250px; /* Largura do menu */
+    height: 100vh; /* Altura total da tela */
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    left: -250px; /* Esconde o menu inicialmente */
+    transition: left 0.3s ease;
+    z-index: 1000; /* Garante que o menu fique acima do conteúdo */
+}
+
+.sidebar.active {
+    left: 0; /* Mostra o menu quando ativo */
+}
+
+.sidebar-toggle {
+    position: absolute;
+    right: -79px; /* Posiciona o botão fora do menu */
+    top: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1001; /* Garante que o botão fique acima do menu */
+}
+
+.sidebar-content {
+    padding: 20px;
+    padding-top: 50px;
+}
+
+.sidebar-box .btn-option {
+    display: block;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-box .btn-option::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s ease-out;
+}
+.sidebar-box .btn-option:hover{
+    background-color: #2c3e51;
+
+}
+.sidebar-box .btn-option:hover::after {
+    width: 100%; /* Faz o sublinhado crescer da esquerda para a direita */
+    
 }
 
 .container {
@@ -23,6 +91,7 @@ h1 {
 a {
     color: #3498db;
     text-decoration: none;
+    margin-top: 10px; /* Reduz o espaçamento acima do link */
 }
 
 a:hover {
@@ -37,13 +106,15 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    margin-top: 10px; /* Reduz o espaçamento acima do botão */
+    margin-bottom: 10px; /* Adiciona espaçamento abaixo do botão */
 }
 
 button:hover {
     background-color: #2980b9;
 }
 
-/* Cabeçalho fixo */
+/* Estilos para o título fixo */
 .fixed-header {
     position: fixed;
     top: 0;
@@ -57,27 +128,7 @@ button:hover {
     z-index: 1000;
 }
 
-/* Botão de logout */
-.btn-logout {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #e74c3c;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.btn-logout:hover {
-    background-color: #c0392b;
-}
-
-/* Página inicial */
+/* Estilos para a página inicial */
 .home-container {
     display: flex;
     flex-direction: column;
@@ -89,18 +140,18 @@ button:hover {
 }
 
 .home-container .form-container {
-    max-width: 800px;
-    width: 90%;
-    min-height: 400px;
-    padding: 30px;
-    margin: 0 auto;
+    max-width: 800px; /* Define a largura máxima da "box" */
+    width: 90%; /* Faz a "box" ocupar 90% da largura da tela */
+    min-height: 400px; /* Define uma altura mínima */
+    padding: 30px; /* Aumenta o espaçamento interno */
+    margin: 0 auto; /* Centraliza a "box" na tela */
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Formulários */
+/* Estilos para os campos do formulário */
 .form-group {
     margin-bottom: 15px;
 }
@@ -113,12 +164,12 @@ button:hover {
 }
 
 .form-group input, .form-group select {
-    width: 100%;
-    padding: 12px;
+    width: 100%; /* Faz os campos ocuparem 100% da largura do container */
+    padding: 12px; /* Aumenta o espaçamento interno dos campos */
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Aumenta o espaçamento entre os campos */
 }
 
 .form-group input:focus, .form-group select:focus {
@@ -146,13 +197,13 @@ button:hover {
     font-size: 16px;
 }
 
-/* Página de resultados */
+/* Estilos para a página de resultados */
 .results-container {
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    flex-wrap: wrap; /* Permite que os cartões quebrem para a próxima linha se não couberem */
+    gap: 20px; /* Espaçamento entre os cartões */
     padding: 20px;
-    justify-content: flex-start;
+    justify-content: flex-start; /* Alinha os cartões à esquerda */
 }
 
 .exam-card {
@@ -161,8 +212,8 @@ button:hover {
     padding: 20px;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: calc(33.33% - 20px);
-    margin-bottom: 20px;
+    width: calc(33.33% - 20px); /* Define a largura dos cartões (3 por linha) */
+    margin-bottom: 20px; /* Espaçamento entre as linhas de cartões */
     word-wrap: break-word;
 }
 
@@ -173,6 +224,7 @@ button:hover {
     padding-bottom: 10px;
 }
 
+/* Estilos para a categoria */
 .category {
     font-size: 18px;
     font-weight: bold;
@@ -223,15 +275,15 @@ button:hover {
     text-decoration: underline;
 }
 
-/* Botão "Adicionar Novo Exame" */
+/* Estilos para o botão "Adicionar Novo Exame" */
 .add-exam-button {
-    text-align: right;
-    margin-bottom: 20px;
-    margin-top: 20px;
+    text-align: right; /* Alinha o botão à direita */
+    margin-bottom: 20px; /* Espaçamento abaixo do botão */
+    margin-top: 20px; /* Adiciona espaçamento acima do botão */
 }
 
 .btn-add-exam {
-    background-color: #4CAF50;
+    background-color: #4CAF50; /* Verde */
     color: white;
     padding: 10px 20px;
     border: none;
@@ -242,10 +294,10 @@ button:hover {
 }
 
 .btn-add-exam:hover {
-    background-color: #45a049;
+    background-color: #45a049; /* Verde mais escuro ao passar o mouse */
 }
 
-/* Páginas de login e registro */
+/* Estilos para as páginas de login e registro */
 .login-container, .register-container {
     display: flex;
     justify-content: center;
@@ -325,7 +377,7 @@ button:hover {
     text-decoration: underline;
 }
 
-/* Mensagens flash */
+/* Estilos para mensagens flash */
 .flash-messages {
     position: fixed;
     top: 20px;
@@ -374,7 +426,27 @@ button:hover {
     animation: fadeOutUp 0.5s ease forwards;
 }
 
-/* Modal */
+/* Estilo para o botão de logout */
+.btn-logout {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #c0392b;
+}
+
+/* Estilos para o modal */
 .modal {
     display: none;
     position: fixed;
@@ -408,7 +480,7 @@ button:hover {
     color: #333;
 }
 
-/* Área de pré-visualização da etiqueta */
+/* Estilos para a área de pré-visualização da etiqueta */
 .label-preview {
     margin-top: 20px;
     padding: 20px;
@@ -448,7 +520,7 @@ button:hover {
     margin-top: 20px;
 }
 
-/* Botão de gerar etiqueta */
+/* Estilos para o botão de gerar etiqueta */
 .btn-generate-label {
     background-color: #4CAF50;
     color: white;
@@ -464,7 +536,6 @@ button:hover {
     background-color: #45a049;
 }
 
-/* Opções na página inicial */
 .options {
     display: flex;
     flex-direction: column;
@@ -488,46 +559,34 @@ button:hover {
     background-color: #2980b9;
 }
 
-/* Estilos para as sugestões de exames */
-.suggestions {
-    border: 1px solid #ccc;
-    max-height: 150px;
-    overflow-y: auto;
-    margin-top: 5px;
+/* Estilos para a área de pré-visualização da etiqueta */
+.label-preview {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-.suggestion-item {
-    padding: 10px;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #eee;
+.label-preview h3 {
+    margin-top: 0;
+    color: #2c3e50;
 }
 
-.suggestion-item:hover {
-    background-color: #e9e9e9;
+.label-preview p {
+    margin: 10px 0;
+    font-size: 16px;
 }
 
-/* Estilos para os exames selecionados */
-.selected-exams {
-    margin-top: 10px;
-}
+.label-preview button {
+    margin-top: 20px;
+}   
 
-.selected-exam {
-    display: inline-block;
-    padding: 5px 10px;
-    margin: 5px;
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.selected-exam:hover {
-    background-color: #d0d0d0;
-}
-
-/* Botão de voltar */
+/* Estilo para o botão de voltar */
 .btn-back {
-    background-color: #6c757d;
+    background-color: #6c757d; /* Cinza */
     color: white;
     padding: 10px 20px;
     border: none;
@@ -538,5 +597,5 @@ button:hover {
 }
 
 .btn-back:hover {
-    background-color: #5a6268;
+    background-color: #5a6268; /* Cinza mais escuro ao passar o mouse */
 }

@@ -7,17 +7,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
 </head>
 <body>
-    <div class="fixed-header">
-        <h1>Bem-vindo!</h1>
-    </div>
-
-    <div class="home-container">
-        <h2>O que você deseja fazer?</h2>
-        <div class="options">
-            <a href="{{ url_for('labels.generate_label_route') }}" class="btn-option">Gerar Etiqueta</a>
-            <a href="{{ url_for('exams.exame') }}" class="btn-option">Registrar Exame</a>
-            <a href="{{ url_for('patients.patient_form') }}" class="btn-option">Preencher Ficha do Paciente</a>
+    <!-- Menu Suspenso -->
+    <div class="sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
+        <div class="sidebar-content">
+            <div class="sidebar-box">
+                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
+                <a href="{{ url_for('exame') }}" class="btn-option">Registrar Exame</a>
+                <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
+            </div>
         </div>
     </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <div class="fixed-header">
+            <h1>Bem-vindo, {{ current_user.username }}!</h1>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

@@ -9,12 +9,13 @@
 <body>
     <div class="fixed-header">
         <h1>Resultados dos Exames</h1>
+        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
     </div>
 
     <div class="container">
         <!-- Botão "Adicionar Novo Exame" -->
         <div class="add-exam-button">
-            <a href="/" class="btn-add-exam">Adicionar Novo Exame</a>
+            <a href="{{url_for('exame')}}" class="btn-add-exam">Adicionar Novo Exame</a>
         </div>
 
         <!-- Lista de resultados -->
