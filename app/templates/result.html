@@ -7,6 +7,23 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
 </head>
 <body>
+    <div class="sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
+        <div class="sidebar-content">
+            <div class="sidebar-box">
+                <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
+                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
+                <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        }
+    </script>
     <div class="fixed-header">
         <h1>Resultados dos Exames</h1>
         <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>

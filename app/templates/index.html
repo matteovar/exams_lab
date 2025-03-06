@@ -25,6 +25,13 @@
             <h1>Bem-vindo, {{ current_user.username }}!</h1>
             <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
         </div>
+
+        <!-- Botões Grandes na Tela Inicial -->
+        <div class="button-container">
+            <a href="{{ url_for('generate_label') }}" class="btn-large">Gerar Etiqueta</a>
+            <a href="{{ url_for('exame') }}" class="btn-large">Registrar Exame</a>
+            <a href="{{ url_for('results') }}" class="btn-large">Ver Resultados</a>
+        </div>
     </div>
 
     <script>

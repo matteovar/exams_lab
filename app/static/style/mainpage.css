@@ -8,6 +8,15 @@ body {
     padding-top: 80px; /* Aumente o espaçamento para evitar sobreposição */
 }
 
+.main-content {
+    transition: margin-left 0.3s ease; /* Adiciona transição suave */
+    margin-left: 0; /* Posição inicial */
+}
+
+.sidebar.active ~ .main-content {
+    margin-left: 250px; /* Largura do menu */
+}
+
 /* Menu Suspenso */
 .sidebar {
     width: 250px; /* Largura do menu */
@@ -15,7 +24,8 @@ body {
     background-color: #2c3e50;
     color: white;
     position: fixed;
-    left: -250px; /* Esconde o menu inicialmente */
+    margin-top: 7px;
+    left: -251px; /* Esconde o menu inicialmente */
     transition: left 0.3s ease;
     z-index: 1000; /* Garante que o menu fique acima do conteúdo */
 }
@@ -23,6 +33,7 @@ body {
 .sidebar.active {
     left: 0; /* Mostra o menu quando ativo */
 }
+
 
 .sidebar-toggle {
     position: absolute;
@@ -74,6 +85,67 @@ body {
 .sidebar-box .btn-option:hover::after {
     width: 100%; /* Faz o sublinhado crescer da esquerda para a direita */
     
+}
+
+/* Estilos para o container dos botões na tela principal */
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas de tamanho igual */
+    grid-template-rows: repeat(2, 1fr); /* 2 linhas de tamanho igual */
+    gap: 20px; /* Espaçamento entre os botões */
+    margin-top: 50px;
+    padding: 0 20px; /* Adiciona um pouco de padding nas laterais */
+    width: 100%; /* Ocupa toda a largura disponível */
+    max-width: 1200px; /* Define uma largura máxima para o container */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Estilos para os botões grandes */
+.btn-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 60px; /* Aumentei o padding para aumentar o tamanho interno */
+    font-size: 24px; /* Aumentei o tamanho da fonte */
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: #007bff;
+    border-radius: 12px; /* Aumentei o raio da borda */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra sutil */
+    width: 100%; /* Ocupa toda a largura da célula do grid */
+    height: 100%; /* Ocupa toda a altura da célula do grid */
+    min-height: 250px;
+    box-sizing: border-box;/* Altura mínima para garantir que fiquem grandes */
+}
+
+.btn-large:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px); /* Efeito de levantar ao passar o mouse */
+}
+
+/* Posicionamento do terceiro botão */
+.btn-large:nth-child(3) {
+    grid-column: span ; /* Faz o terceiro botão ocupar 2 colunas */
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    .button-container {
+        grid-template-columns: 1fr; /* Coloca os botões em uma coluna em telas pequenas */
+    }
+
+    .btn-large:nth-child(3) {
+        grid-column: span 1; /* O terceiro botão volta a ocupar 1 coluna */
+    }
+
+    .btn-large {
+        padding: 30px 40px; /* Reduz o padding em telas menores */
+        font-size: 20px; /* Reduz o tamanho da fonte em telas menores */
+        min-height: 120px; /* Altura mínima menor para telas pequenas */
+    }
 }
 
 .container {
@@ -421,6 +493,7 @@ button:hover {
         transform: translateY(-20px);
     }
 }
+
 
 .flash-messages div.fade-out {
     animation: fadeOutUp 0.5s ease forwards;
