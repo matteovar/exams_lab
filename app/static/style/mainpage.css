@@ -128,7 +128,7 @@ body {
 
 /* Posicionamento do terceiro botão */
 .btn-large:nth-child(3) {
-    grid-column: span ; /* Faz o terceiro botão ocupar 2 colunas */
+    grid-column: span 1; /* Faz o terceiro botão ocupar 2 colunas */
 }
 
 /* Responsividade para telas menores */
@@ -145,6 +145,23 @@ body {
         padding: 30px 40px; /* Reduz o padding em telas menores */
         font-size: 20px; /* Reduz o tamanho da fonte em telas menores */
         min-height: 120px; /* Altura mínima menor para telas pequenas */
+    }
+    /* Ajustes para o menu em telas pequenas */
+    .sidebar.active ~ .main-content {
+        margin-left: 0; /* O conteúdo não se move em telas pequenas */
+    }
+
+    .sidebar {
+        width: 100%; /* O menu ocupa toda a largura em telas pequenas */
+        left: -100%; /* Esconde o menu completamente */
+    }
+
+    .sidebar.active {
+        left: 0; /* Mostra o menu quando ativo */
+    }
+
+    .sidebar-toggle {
+        right: 10px; /* Posiciona o botão dentro da tela em telas pequenas */
     }
 }
 
