@@ -5,12 +5,14 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    padding-top: 80px; /* Aumente o espaçamento para evitar sobreposição */
+    padding-top: 80px; /* Espaçamento para o cabeçalho fixo */
+    padding-left: 250px; /* Adiciona padding à esquerda para acomodar a barra lateral */
 }
 
 .main-content {
-    transition: margin-left 0.3s ease; /* Adiciona transição suave */
-    margin-left: 0; /* Posição inicial */
+    margin-left: 0; /* Remove a margem esquerda */
+    padding: 20px; /* Adiciona padding ao conteúdo principal */
+    transition: none; /* Remove a transição */
 }
 
 .sidebar.active ~ .main-content {
@@ -19,21 +21,22 @@ body {
 
 /* Menu Suspenso */
 .sidebar {
-    width: 250px; /* Largura do menu */
+    width: 250px; /* Largura fixa do menu */
     height: 100vh; /* Altura total da tela */
     background-color: #2c3e50;
     color: white;
     position: fixed;
-    margin-top: 7px;
-    left: -251px; /* Esconde o menu inicialmente */
-    transition: left 0.3s ease;
-    z-index: 1000; /* Garante que o menu fique acima do conteúdo */
+    top: 0;
+    left: 0; /* Esconde o menu fora da tela */
+    z-index: 1000;
+    overflow-y: auto; /* Adiciona rolagem vertical se necessário */
+    overflow-x: hidden; /* Remove a rolagem horizontal */
+    transition: left 0.3s ease; /* Animação ao abrir/fechar */
 }
 
 .sidebar.active {
     left: 0; /* Mostra o menu quando ativo */
 }
-
 
 .sidebar-toggle {
     position: absolute;
@@ -50,7 +53,8 @@ body {
 
 .sidebar-content {
     padding: 20px;
-    padding-top: 50px;
+    padding-top: 70px; /* Espaçamento para o topo */
+    margin-top: 50px;
 }
 
 .sidebar-box .btn-option {
@@ -78,27 +82,74 @@ body {
     background-color: white;
     transition: width 0.3s ease-out;
 }
-.sidebar-box .btn-option:hover{
-    background-color: #2c3e51;
 
+.sidebar-box .btn-option:hover {
+    background-color: #34495e;
 }
+
 .sidebar-box .btn-option:hover::after {
-    width: 100%; /* Faz o sublinhado crescer da esquerda para a direita */
-    
+    width: 100%;
 }
 
 /* Estilos para o container dos botões na tela principal */
 .button-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 colunas de tamanho igual */
-    grid-template-rows: repeat(2, 1fr); /* 2 linhas de tamanho igual */
+    display: flex;
+    justify-content: center; /* Centraliza os botões horizontalmente */
     gap: 20px; /* Espaçamento entre os botões */
-    margin-top: 50px;
-    padding: 0 20px; /* Adiciona um pouco de padding nas laterais */
-    width: 100%; /* Ocupa toda a largura disponível */
-    max-width: 1200px; /* Define uma largura máxima para o container */
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 30px; /* Espaçamento acima dos botões */
+    width: 100%; /* Ocupa a largura total do formulário */
+}
+
+.main-menu-btn {
+    background-size: cover; /* Faz a imagem cobrir todo o botão */
+    background-position: center; /* Centraliza a imagem no botão */
+    color: white; /* Cor do texto */
+    font-size: 25px; /* Tamanho da fonte */
+    font-weight: bold; /* Peso da fonte */
+    padding: 60px 90px; /* Espaçamento interno do botão */
+    border: none; /* Remove a borda padrão */
+    border-radius: 10px; /* Bordas arredondadas */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Sombra no texto para melhorar a legibilidade */
+    margin: 5px; /* Espaçamento entre os botões */
+    width: 300px; /* Largura fixa para os botões */
+    height: 80px; /* Altura fixa para os botões */
+    text-align: right; /* Centraliza o texto no botão */
+    display: inline-block; /* Para garantir que os botões fiquem alinhados */
+    text-decoration: none; /* Remove o sublinhado dos links */
+}
+
+/* Classes específicas para cada botão */
+.btn-gerar-etiqueta {
+    background-image: url("/static/assets/etiqueta.png");
+}
+
+.btn-registrar-exame {
+    background-image: url("/static/assets/frasco.png");
+}
+
+.btn-ver-resultados {
+    background-image: url("/static/assets/result.png");
+}
+
+.btn-ficha-cliente {
+    background-image: url("/static/assets/cadastro.png");
+}
+
+/*1605x750
+/* Estilo padrão para os botões do menu lateral */
+.sidebar .btn-option {
+    /* Estilos padrão do menu lateral (sem imagem de fundo) */
+    background-color: #2c3e50; /* Cor de fundo padrão */
+    color: #ffffff; /* Cor do texto */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: block; /* Botões em bloco para o menu lateral */
 }
 
 /* Estilos para os botões grandes */
@@ -115,7 +166,7 @@ body {
     border-radius: 12px; /* Aumentei o raio da borda */
     transition: background-color 0.3s ease, transform 0.2s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra sutil */
-    width: 100%; /* Ocupa toda a largura da célula do grid */
+    width: 97%; /* Ocupa toda a largura da célula do grid */
     height: 100%; /* Ocupa toda a altura da célula do grid */
     min-height: 250px;
     box-sizing: border-box;/* Altura mínima para garantir que fiquem grandes */
@@ -127,48 +178,41 @@ body {
 }
 
 /* Posicionamento do terceiro botão */
-.btn-large:nth-child(3) {
+.btn-large:nth-child(4) {
     grid-column: span 1; /* Faz o terceiro botão ocupar 2 colunas */
 }
 
 /* Responsividade para telas menores */
 @media (max-width: 768px) {
-    .button-container {
-        grid-template-columns: 1fr; /* Coloca os botões em uma coluna em telas pequenas */
-    }
-
-    .btn-large:nth-child(3) {
-        grid-column: span 1; /* O terceiro botão volta a ocupar 1 coluna */
-    }
-
-    .btn-large {
-        padding: 30px 40px; /* Reduz o padding em telas menores */
-        font-size: 20px; /* Reduz o tamanho da fonte em telas menores */
-        min-height: 120px; /* Altura mínima menor para telas pequenas */
-    }
-    /* Ajustes para o menu em telas pequenas */
-    .sidebar.active ~ .main-content {
-        margin-left: 0; /* O conteúdo não se move em telas pequenas */
+    body {
+        padding-left: 0; /* Remove o padding à esquerda em telas pequenas */
     }
 
     .sidebar {
-        width: 100%; /* O menu ocupa toda a largura em telas pequenas */
-        left: -100%; /* Esconde o menu completamente */
+        width: 100%; /* A barra lateral ocupa toda a largura em telas pequenas */
+        height: auto; /* Altura automática */
+        position: static; /* Remove a posição fixa */
     }
 
-    .sidebar.active {
-        left: 0; /* Mostra o menu quando ativo */
+    .sidebar-content {
+        padding-top: 20px; /* Reduz o padding no topo */
     }
 
-    .sidebar-toggle {
-        right: 10px; /* Posiciona o botão dentro da tela em telas pequenas */
+    .main-content {
+        padding: 10px; /* Reduz o padding do conteúdo principal */
     }
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Faz o container ocupar toda a altura da tela */
+    justify-content: space-between; /* Distribui o espaço entre os elementos */
+    padding-bottom: 20px; /* Adiciona um espaçamento na parte inferior */
+}
+
+.container p2{
+    margin-left: 20px;
 }
 
 h1 {
@@ -199,10 +243,35 @@ button {
     margin-bottom: 10px; /* Adiciona espaçamento abaixo do botão */
 }
 
-button:hover {
+/* Estilo para o container dos botões */
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(2, auto); /* Dois botões lado a lado */
+    justify-content: center; /* Centraliza os botões horizontalmente */
+    gap: 20px; /* Espaçamento entre os botões */
+    margin-top: 30px; /* Espaçamento acima dos botões */
+}
+
+/* Estilo para os botões */
+button[type="submit"], .btn-back {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: auto; /* Largura automática para os botões */
+}
+button[type="submit"]:hover, .btn-back:hover {
     background-color: #2980b9;
 }
 
+@media (max-width: 768px) {
+    .home-container form {
+        grid-template-columns: 1fr; /* 1 coluna em telas pequenas */
+    }
+}
 /* Estilos para o título fixo */
 .fixed-header {
     position: fixed;
@@ -221,11 +290,18 @@ button:hover {
 .home-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: center; /* Centraliza o conteúdo horizontalmente */
+    justify-content: center; /* Centraliza o conteúdo verticalmente */
     min-height: 100vh;
-    text-align: center;
     padding: 20px;
+}
+
+.home-container form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas de tamanho igual */
+    gap: 40px; /* Espaçamento entre as caixas */
+    max-width: 800px; /* Largura máxima do formulário */
+    width: 100%;
 }
 
 .home-container .form-container {
@@ -242,7 +318,7 @@ button:hover {
 
 /* Estilos para os campos do formulário */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 30px;
 }
 
 .form-group label {
@@ -253,12 +329,11 @@ button:hover {
 }
 
 .form-group input, .form-group select {
-    width: 100%; /* Faz os campos ocuparem 100% da largura do container */
-    padding: 12px; /* Aumenta o espaçamento interno dos campos */
+    width: 100%;
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
-    margin-bottom: 15px; /* Aumenta o espaçamento entre os campos */
 }
 
 .form-group input:focus, .form-group select:focus {
@@ -285,6 +360,14 @@ button:hover {
     margin-bottom: 15px;
     font-size: 16px;
 }
+.client-info {
+    margin-left: 10px;
+}
+
+.exam-info h3{
+    margin-left: 10px;
+}
+
 
 /* Estilos para a página de resultados */
 .results-container {
@@ -368,7 +451,8 @@ button:hover {
 .add-exam-button {
     text-align: right; /* Alinha o botão à direita */
     margin-bottom: 20px; /* Espaçamento abaixo do botão */
-    margin-top: 20px; /* Adiciona espaçamento acima do botão */
+    margin-top: 40px; 
+    margin-right: 10px;/* Adiciona espaçamento acima do botão */
 }
 
 .btn-add-exam {
@@ -510,7 +594,6 @@ button:hover {
         transform: translateY(-20px);
     }
 }
-
 
 .flash-messages div.fade-out {
     animation: fadeOutUp 0.5s ease forwards;
@@ -672,7 +755,7 @@ button:hover {
 
 .label-preview button {
     margin-top: 20px;
-}   
+}
 
 /* Estilo para o botão de voltar */
 .btn-back {
@@ -683,7 +766,10 @@ button:hover {
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 20px;
+    margin: 0 auto; /* Centraliza horizontalmente */
+    display: block; /* Faz o botão ocupar a largura máxima */
+    width: fit-content; /* Ajusta a largura ao conteúdo */
+    text-align: center; /* Centraliza o texto */
 }
 
 .btn-back:hover {

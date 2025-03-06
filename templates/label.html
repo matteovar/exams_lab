@@ -11,30 +11,41 @@
 <body>
     <div class="fixed-header">
         <h1>Etiqueta Gerada</h1>
+        <a href="{{ url_for('home') }}" class="btn-logout">Voltar</a>
     </div>
 
     <div class="home-container">
         <!-- Área para exibir a etiqueta gerada -->
         <div id="labelPreview" class="label-preview">
-            <h3>Etiqueta Gerada</h3>
-            <svg id="barcode"></svg> <!-- Elemento SVG para o código de barras -->
-            <p id="labelPatientName">Paciente: {{ patient_name }}</p>
-            <p id="labelExamType">Exame: {{ exam_type }}</p>
+            <!-- Nome e exame no canto superior esquerdo -->
+            <div class="label-header">
+                <p><strong>Paciente:</strong> {{ patient_name }}</p>
+                <p><strong>Exame:</strong> {{ exam_type }}</p>
+            </div>
+
+            <!-- Código de barras e ID -->
+            <div class="label-barcode">
+                <svg id="barcode"></svg>
+                <p><strong>ID:</strong> {{ barcode_id }}</p>
+            </div>
+
+            <!-- Data e horário da impressão -->
+            <div class="label-footer">
+                <p><strong>Data e Horário:</strong> {{ current_time }}</p>
+            </div>
+
+            <!-- Botão para imprimir -->
             <button onclick="printLabel()">Imprimir Etiqueta</button>
         </div>
-
-        <!-- Botão de Voltar -->
-        <button onclick="goBack()" class="btn-back">Voltar</button>
     </div>
 
     <script>
         // Função para gerar o código de barras
         function generateBarcode() {
-            const patientName = "{{ patient_name }}";
-            const examType = "{{ exam_type }}";
+            const barcodeId = "{{ barcode_id }}";
 
             // Gera o código de barras
-            JsBarcode("#barcode", `${patientName}-${examType}`, {
+            JsBarcode("#barcode", barcodeId, {
                 format: "CODE128", // Formato do código de barras
                 displayValue: true, // Exibe o valor abaixo do código de barras
                 fontSize: 16, // Tamanho da fonte do valor
@@ -47,11 +58,6 @@
         // Função para imprimir a etiqueta
         function printLabel() {
             window.print();
-        }
-
-        // Função para voltar à página anterior
-        function goBack() {
-            window.history.back();
         }
 
         // Gera o código de barras ao carregar a página

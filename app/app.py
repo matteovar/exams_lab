@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from models import db, User, Exam, Category, SubCategory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from models import db, Exam
 from collections import defaultdict
 
 app = Flask(__name__)
@@ -10,25 +9,6 @@ app.secret_key = 'sua_chave_secreta_aqui'
 
 # Inicializa o banco de dados
 db.init_app(app)
-
-# Configuração do Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# Função para criar o admin automaticamente
-def create_admin():
-    admin = User.query.filter_by(username='admin').first()
-    if not admin:
-        admin = User(username='admin', is_admin=True)
-        admin.set_password('admin123')  # Senha padrão para o admin
-        db.session.add(admin)
-        db.session.commit()
-        print("Admin criado com sucesso!")
 
 # Lista de tipos de exames pré-definidos (categorias)
 EXAM_TYPES = ['Hemograma', 'Ultrassonografia', 'Raio-X', 'Tomografia', 'Eletrocardiograma']
@@ -42,85 +22,32 @@ EXAM_SUBCATEGORIES = {
     'Eletrocardiograma': ['Eletrocardiograma de Repouso', 'Eletrocardiograma de Esforço']
 }
 
-# Rota para a raiz (/) - Agora renderiza o que era home.html
+# Rota para a raiz (/) - Redireciona para a página inicial
 @app.route('/')
 def root():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))  # Redireciona para a página inicial (home)
-    else:
-        return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
-# Rota para a página inicial (home) - Agora renderiza o que era home.html
+# Rota para a página inicial
 @app.route('/home')
-@login_required
 def home():
-    return render_template('index.html')  # Renderiza o que era home.html
+    return render_template('index.html')
 
-# Rota para a página de exame (exame.html) - Agora renderiza o que era index.html
+# Rota para a página de exame
 @app.route('/exame')
-@login_required
 def exame():
-    return render_template('exame.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)  # Passa exam_subcategories
-
-# Rota para login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        
-        if user:  # Verifica se o usuário existe
-            if user.check_password(password):  # Verifica a senha
-                login_user(user)
-                flash('Login bem-sucedido!', 'success')
-                return redirect(url_for('home'))
-            else:
-                flash('Senha incorreta.', 'error')
-        else:
-            flash('Conta inexistente.', 'error')  # Mensagem para conta inexistente
-    return render_template('login.html')
-
-# Rota para registro
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        is_admin = 'is_admin' in request.form
-        
-        user = User(username=username, is_admin=is_admin)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-        
-        flash('Usuário registrado com sucesso!', 'success')
-        return redirect(url_for('login'))
-    
-    return render_template('register.html')
-
-# Rota para logout
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash('Você foi desconectado.', 'success')
-    return redirect(url_for('login'))
+    return render_template('exame.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
 # Rota para gerar etiqueta
 @app.route('/generate_label', methods=['GET', 'POST'])
-@login_required
 def generate_label():
     if request.method == 'POST':
         patient_name = request.form['patient_name']
         exam_type = request.form['exam_type']
-        # Passa os dados para o template label.html
         return render_template('label.html', patient_name=patient_name, exam_type=exam_type)
     return render_template('generate_label.html', exam_types=EXAM_TYPES)
 
 # Rota para registrar exame
 @app.route('/submit', methods=['POST'])
-@login_required
 def submit_exam():
     patient_name = request.form['patient_name']
     category = request.form['category']
@@ -132,33 +59,19 @@ def submit_exam():
         if key not in ['patient_name', 'category', 'subcategory', 'result']:
             details[key] = value
 
-    existing_patient = Exam.query.filter_by(patient_name=patient_name).first()
-
-    if existing_patient:
-        new_exam = Exam(
-            patient_name=patient_name,
-            category=category,
-            subcategory=subcategory,
-            result=result,
-            details=details
-        )
-        db.session.add(new_exam)
-    else:
-        new_exam = Exam(
-            patient_name=patient_name,
-            category=category,
-            subcategory=subcategory,
-            result=result,
-            details=details
-        )
-        db.session.add(new_exam)
-
+    new_exam = Exam(
+        patient_name=patient_name,
+        category=category,
+        subcategory=subcategory,
+        result=result,
+        details=details
+    )
+    db.session.add(new_exam)
     db.session.commit()
     return redirect(url_for('results'))
 
 # Rota para exibir todos os resultados de exames
 @app.route('/results')
-@login_required
 def results():
     exams = Exam.query.all()
     grouped_exams = defaultdict(lambda: {"category": None, "exams": []})
@@ -173,9 +86,75 @@ def results():
         })
     return render_template('result.html', grouped_exams=grouped_exams)
 
+# Rota para a página de pesquisa do cliente
+@app.route('/client_record_search', methods=['GET', 'POST'])
+def client_record_search():
+    if request.method == 'POST':
+        print(request.form)  # Verifique se os dados estão sendo recebidos corretamente
+        patient_name = request.form['patient_name']
+        cpf = request.form['cpf']
+        phone = request.form['phone']
+        address = request.form['address']
+        category = request.form['category']
+        subcategory = request.form['subcategory']
+        
+        # Salva os dados do cliente e do exame no banco de dados
+        new_exam = Exam(
+            patient_name=patient_name,
+            cpf=cpf,
+            phone=phone,
+            address=address,
+            category=category,
+            subcategory=subcategory,
+            result="",  # Resultado vazio por enquanto
+            details={}  # Detalhes vazios por enquanto
+        )
+        db.session.add(new_exam)
+        db.session.commit()
+        
+        flash('Ficha do cliente e exame salvos com sucesso!', 'success')
+        return redirect(url_for('client_record', patient_name=patient_name))
+    
+    return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
+
+
+# Rota para exibir a ficha do cliente
+@app.route('/client_record/<string:patient_name>')
+def client_record(patient_name):
+    exams = Exam.query.filter_by(patient_name=patient_name).all()
+    
+    if not exams:
+        flash(f'Nenhum exame encontrado para o paciente: {patient_name}', 'warning')
+        return redirect(url_for('client_record_search'))
+    
+    # Pega as informações do cliente do primeiro exame (já que são as mesmas para todos os exames)
+    client_info = {
+        "cpf": exams[0].cpf,
+        "phone": exams[0].phone,
+        "address": exams[0].address
+    }
+    
+    # Agrupa os exames por categoria
+    grouped_exams = defaultdict(lambda: {"exams": []})
+    for exam in exams:
+        grouped_exams[exam.category]["exams"].append({
+            "id": exam.id,
+            "subcategory": exam.subcategory,
+            "result": exam.result,
+            "details": exam.details
+        })
+    
+    return render_template(
+        'client_record.html',
+        patient_name=patient_name,
+        cpf=client_info["cpf"],
+        phone=client_info["phone"],
+        address=client_info["address"],
+        grouped_exams=grouped_exams
+    )
+
 # Rota para editar um exame
 @app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
-@login_required
 def edit_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
 
@@ -198,7 +177,6 @@ def edit_exam(exam_id):
 
 # Rota para excluir um exame
 @app.route('/delete/<int:exam_id>', methods=['GET', 'POST'])
-@login_required
 def delete_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     db.session.delete(exam)
@@ -208,5 +186,4 @@ def delete_exam(exam_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Cria as tabelas no banco de dados
-        create_admin()   # Cria o admin automaticamente
     app.run(debug=True)

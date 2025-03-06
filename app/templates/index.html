@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
 </head>
 <body>
-    <!-- Menu Suspenso -->
+    <!-- Barra Lateral Fixa -->
     <div class="sidebar">
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
         <div class="sidebar-content">
             <div class="sidebar-box">
-                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
                 <a href="{{ url_for('exame') }}" class="btn-option">Registrar Exame</a>
+                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
                 <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
+                <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
             </div>
         </div>
     </div>
@@ -22,23 +22,16 @@
     <!-- Conteúdo Principal -->
     <div class="main-content">
         <div class="fixed-header">
-            <h1>Bem-vindo, {{ current_user.username }}!</h1>
-            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            <h1>Bem-vindo!</h1>
         </div>
 
         <!-- Botões Grandes na Tela Inicial -->
         <div class="button-container">
-            <a href="{{ url_for('generate_label') }}" class="btn-large">Gerar Etiqueta</a>
-            <a href="{{ url_for('exame') }}" class="btn-large">Registrar Exame</a>
-            <a href="{{ url_for('results') }}" class="btn-large">Ver Resultados</a>
+            <a href="{{ url_for('exame') }}" class="main-menu-btn btn-registrar-exame">Registrar Exame</a>
+            <a href="{{ url_for('generate_label') }}" class="main-menu-btn btn-gerar-etiqueta">Gerar Etiqueta</a>
+            <a href="{{ url_for('results') }}" class="main-menu-btn btn-ver-resultados">Ver Resultados</a>
+            <a href="{{ url_for('client_record_search') }}" class="main-menu-btn btn-ficha-cliente">Ficha do Cliente</a>
         </div>
     </div>
-
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
-        }
-    </script>
 </body>
 </html>

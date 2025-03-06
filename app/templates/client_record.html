@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados dos Exames</title>
+    <title>Ficha do Cliente</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
 </head>
 <body>
@@ -12,10 +12,9 @@
         <div class="sidebar-content">
             <div class="sidebar-box">
                 <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
-                <a href="{{ url_for('exame') }}" class="btn-option">Registrar Exame</a>
                 <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
+                <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
                 <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
-
             </div>
         </div>
     </div>
@@ -26,30 +25,38 @@
             sidebar.classList.toggle('active');
         }
     </script>
+
     <div class="fixed-header">
-        <h1>Resultados dos Exames</h1>
+        <h1>Ficha do Cliente: {{ patient_name }}</h1>
     </div>
+    
+    <div class="add-exam-button">
+        <a href="{{ url_for('client_record_search', patient_name=patient_name) }}" class="btn-add-exam">Adicionar Novo Exame</a>
+    </div>
+      
 
-    <div class="container">
-        <!-- Botão "Adicionar Novo Exame" -->
-        <div class="add-exam-button">
-            <a href="{{url_for('exame')}}" class="btn-add-exam">Adicionar Novo Exame</a>
-        </div>
-
-        <!-- Lista de resultados -->
+    <div class="client-info">
+        <h3>Informações do Cliente</h3>
+        <ul>
+            <li><strong>Nome:</strong> {{ patient_name }}</li>
+            <li><strong>CPF:</strong> {{ cpf }}</li>
+            <li><strong>Telefone:</strong> {{ phone }}</li>
+            <li><strong>Endereço:</strong> {{ address }}</li>
+        </ul>
+    </div>
+    <div class="exam-info">
+        <h3>Exames Realizados</h3>
         {% if grouped_exams %}
             <div class="results-container">
-                {% for patient_name, patient_data in grouped_exams.items() %}
+                {% for category, category_data in grouped_exams.items() %}
                     <div class="exam-card">
-                        <h3>{{ patient_name }}</h3>
                         <div class="category">
-                            <strong>Categoria:</strong> {{ patient_data.category }}
+                            <strong>Categoria:</strong> {{ category }}
                         </div>
-                        {% for exam in patient_data.exams %}
+                        {% for exam in category_data.exams %}
                             <div class="exam-details">
                                 <ul>
                                     <li><strong>Subcategoria:</strong> {{ exam.subcategory }}</li>
-                                    <li><strong>Resultado Geral:</strong> {{ exam.result }}</li>
                                     {% if exam.details %}
                                         {% for key, value in exam.details.items() %}
                                             <li>
@@ -59,18 +66,13 @@
                                         {% endfor %}
                                     {% endif %}
                                 </ul>
-                                <div class="actions">
-                                    <a href="{{ url_for('edit_exam', exam_id=exam.id) }}">Editar</a>
-                                    <a href="{{ url_for('delete_exam', exam_id=exam.id) }}" onclick="return confirm('Tem certeza que deseja excluir este exame?')">Excluir</a>
-                                    <a href="{{ url_for('client_record', patient_name=patient_name) }}">Ver Resultado</a>
-                                </div>
                             </div>
                         {% endfor %}
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p2>Não há exames registrados ainda.</p2>
+            <p>Não há exames registrados para este paciente.</p>
         {% endif %}
         <button onclick="goBack()" class="btn-back">Voltar</button>
     </div>

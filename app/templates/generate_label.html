@@ -12,8 +12,10 @@
         <div class="sidebar-content">
             <div class="sidebar-box">
                 <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
-                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
+                <a href="{{ url_for('exame') }}" class="btn-option">Registrar Exame</a>
                 <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
+                <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
+
             </div>
         </div>
     </div>
@@ -26,7 +28,6 @@
     </script>
     <div class="fixed-header">
         <h1>Gerar Etiqueta</h1>
-        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
     </div>
 
     <div class="home-container">
