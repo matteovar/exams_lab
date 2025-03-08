@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from models import db, Exam
 from collections import defaultdict
+import json
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exams.db'
@@ -10,17 +12,18 @@ app.secret_key = 'sua_chave_secreta_aqui'
 # Inicializa o banco de dados
 db.init_app(app)
 
-# Lista de tipos de exames pré-definidos (categorias)
-EXAM_TYPES = ['Hemograma', 'Ultrassonografia', 'Raio-X', 'Tomografia', 'Eletrocardiograma']
+# Caminho para os arquivos JSON dentro da subpasta 'info'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+categories_path = os.path.join(current_dir, 'static', 'infos', 'categorias.json')
+subcategories_path = os.path.join(current_dir, 'static', 'infos', 'subcategories.json')
 
-# Subcategorias para cada tipo de exame
-EXAM_SUBCATEGORIES = {
-    'Hemograma': ['Hemograma Completo', 'Plaquetas', 'Leucócitos'],
-    'Ultrassonografia': ['Ultrassonografia Abdominal', 'Ultrassonografia Pélvica'],
-    'Raio-X': ['Raio-X Torácico', 'Raio-X Ósseo'],
-    'Tomografia': ['Tomografia Computadorizada', 'Tomografia por Emissão'],
-    'Eletrocardiograma': ['Eletrocardiograma de Repouso', 'Eletrocardiograma de Esforço']
-}
+# Carrega as categorias e subcategorias dos arquivos JSON
+with open(categories_path, 'r', encoding='utf-8') as file:
+    EXAM_TYPES = json.load(file)
+
+with open(subcategories_path, 'r', encoding='utf-8') as file:
+    EXAM_SUBCATEGORIES = json.load(file)
+
 
 # Rota para a raiz (/) - Redireciona para a página inicial
 @app.route('/')
@@ -116,7 +119,6 @@ def client_record_search():
         return redirect(url_for('client_record', patient_name=patient_name))
     
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
-
 
 # Rota para exibir a ficha do cliente
 @app.route('/client_record/<string:patient_name>')
