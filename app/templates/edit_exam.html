@@ -3,101 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Exame</title>
+    <title>Editar Exame</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
-    <!-- Biblioteca para gerar código de barras -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
     <div class="fixed-header">
-        <h1>Registrar Novo Exame</h1>
+        <h1>Editar Exame</h1>
     </div>
 
     <div class="home-container">
-        <!-- Botão para gerar etiqueta -->
-        <button onclick="openLabelModal()" class="btn-generate-label">Gerar Etiqueta</button>
-
-        <!-- Modal para gerar etiqueta -->
-        <div id="labelModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeLabelModal()">&times;</span>
-                <h2>Gerar Etiqueta</h2>
-                <form id="labelForm">
-                    <div class="form-group">
-                        <label for="patient_name_label">Nome do Paciente:</label>
-                        <input type="text" id="patient_name_label" name="patient_name_label" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="exam_type_label">Tipo de Exame:</label>
-                        <select id="exam_type_label" name="exam_type_label" required>
-                            <option value="" disabled selected>Selecione o tipo de exame</option>
-                            {% for exam in exam_types %}
-                                <option value="{{ exam }}">{{ exam }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="button" onclick="generateLabel()">Gerar Etiqueta</button>
-                </form>
+        <form action="{{ url_for('edit_exam', exam_id=exam.id) }}" method="POST">
+            <div class="form-group">
+                <label for="patient_name">Nome do Paciente:</label>
+                <input type="text" id="patient_name" name="patient_name" value="{{ exam.patient_name }}" required>
             </div>
-        </div>
-
-        <!-- Área para exibir a etiqueta gerada -->
-        <div id="labelPreview" class="label-preview">
-            <h3>Etiqueta Gerada</h3>
-            <div id="barcode"></div>
-            <p id="labelPatientName"></p>
-            <p id="labelExamType"></p>
-            <button onclick="printLabel()">Imprimir Etiqueta</button>
-        </div>
-
-        <!-- Botão de Voltar -->
+            
+            <div class="form-group">
+                <label for="category">Categoria:</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled>Selecione a categoria</option>
+                    {% for exam_type in exam_types %}
+                        <option value="{{ exam_type }}" {% if exam.category == exam_type %}selected{% endif %}>{{ exam_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="subcategory">Subcategoria:</label>
+                <select id="subcategory" name="subcategory" required>
+                    <option value="" disabled>Selecione a subcategoria</option>
+                    {% for subcat in exam_subcategories[exam.category] %}
+                        <option value="{{ subcat }}" {% if exam.subcategory == subcat %}selected{% endif %}>{{ subcat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="result">Resultado Geral:</label>
+                <input type="text" id="result" name="result" value="{{ exam.result }}" required>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit">Salvar Alterações</button>
+            </div>
+        </form>
         <button onclick="goBack()" class="btn-back">Voltar</button>
     </div>
 
     <script>
-        // Funções para abrir/fechar o modal
-        function openLabelModal() {
-            document.getElementById('labelModal').style.display = 'block';
-        }
-
-        function closeLabelModal() {
-            document.getElementById('labelModal').style.display = 'none';
-        }
-
-        // Função para gerar a etiqueta
-        function generateLabel() {
-            const patientName = document.getElementById('patient_name_label').value;
-            const examType = document.getElementById('exam_type_label').value;
-
-            if (!patientName || !examType) {
-                alert('Por favor, preencha todos os campos.');
-                return;
-            }
-
-            // Exibe as informações na etiqueta
-            document.getElementById('labelPatientName').textContent = `Paciente: ${patientName}`;
-            document.getElementById('labelExamType').textContent = `Exame: ${examType}`;
-
-            // Gera o código de barras
-            JsBarcode("#barcode", `${patientName}-${examType}`, {
-                format: "CODE128",
-                displayValue: true,
-                fontSize: 16,
-            });
-
-            // Exibe a área de pré-visualização da etiqueta
-            document.getElementById('labelPreview').style.display = 'block';
-
-            // Fecha o modal
-            closeLabelModal();
-        }
-
-        // Função para imprimir a etiqueta
-        function printLabel() {
-            window.print();
-        }
-
-        // Função para voltar à página anterior
         function goBack() {
             window.history.back();
         }

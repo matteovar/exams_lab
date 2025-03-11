@@ -24,7 +24,6 @@ with open(categories_path, 'r', encoding='utf-8') as file:
 with open(subcategories_path, 'r', encoding='utf-8') as file:
     EXAM_SUBCATEGORIES = json.load(file)
 
-
 # Rota para a raiz (/) - Redireciona para a página inicial
 @app.route('/')
 def root():
@@ -49,6 +48,21 @@ def generate_label():
         return render_template('label.html', patient_name=patient_name, exam_type=exam_type)
     return render_template('generate_label.html', exam_types=EXAM_TYPES)
 
+# Rota para buscar os detalhes do paciente
+@app.route('/get_patient_details')
+def get_patient_details():
+    patient_name = request.args.get('patient_name')
+    patient = Exam.query.filter_by(patient_name=patient_name).first()
+
+    if patient:
+        return jsonify({
+            'cpf': patient.cpf,
+            'phone': patient.phone,
+            'address': patient.address
+        })
+    else:
+        return jsonify({}), 404
+
 # Rota para registrar exame
 @app.route('/submit', methods=['POST'])
 def submit_exam():
@@ -57,18 +71,25 @@ def submit_exam():
     subcategory = request.form['subcategory']
     result = request.form.get('result', '')
 
-    details = {}
-    for key, value in request.form.items():
-        if key not in ['patient_name', 'category', 'subcategory', 'result']:
-            details[key] = value
+    # Busca o paciente no banco de dados pelo nome
+    patient = Exam.query.filter_by(patient_name=patient_name).first()
 
+    if not patient:
+        flash('Paciente não encontrado. Por favor, cadastre o paciente primeiro.', 'error')
+        return redirect(url_for('exame'))
+
+    # Cria o novo exame usando os dados do paciente existente
     new_exam = Exam(
         patient_name=patient_name,
+        cpf=patient.cpf,  # Usa o CPF do paciente já cadastrado
+        phone=patient.phone,  # Usa o telefone do paciente já cadastrado
+        address=patient.address,  # Usa o endereço do paciente já cadastrado
         category=category,
         subcategory=subcategory,
         result=result,
-        details=details
+        details={}  # Adicione os detalhes específicos do exame aqui, se necessário
     )
+
     db.session.add(new_exam)
     db.session.commit()
     return redirect(url_for('results'))
@@ -93,7 +114,6 @@ def results():
 @app.route('/client_record_search', methods=['GET', 'POST'])
 def client_record_search():
     if request.method == 'POST':
-        print(request.form)  # Verifique se os dados estão sendo recebidos corretamente
         patient_name = request.form['patient_name']
         cpf = request.form['cpf']
         phone = request.form['phone']
@@ -119,6 +139,34 @@ def client_record_search():
         return redirect(url_for('client_record', patient_name=patient_name))
     
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
+
+@app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
+def edit_exam(exam_id):
+    exam = Exam.query.get_or_404(exam_id)
+
+    if request.method == 'POST':
+        exam.patient_name = request.form['patient_name']
+        exam.category = request.form['category']
+        exam.subcategory = request.form['subcategory']
+        exam.result = request.form['result']
+        
+        details = {}
+        for key, value in request.form.items():
+            if key not in ['patient_name', 'category', 'subcategory', 'result']:
+                details[key] = value
+        exam.details = details
+        
+        db.session.commit()
+        return redirect(url_for('results'))
+    
+    return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
+
+@app.route('/delete/<int:exam_id>', methods=['GET', 'POST'])
+def delete_exam(exam_id):
+    exam = Exam.query.get_or_404(exam_id)
+    db.session.delete(exam)
+    db.session.commit()
+    return redirect(url_for('results'))
 
 # Rota para exibir a ficha do cliente
 @app.route('/client_record/<string:patient_name>')
@@ -154,36 +202,6 @@ def client_record(patient_name):
         address=client_info["address"],
         grouped_exams=grouped_exams
     )
-
-# Rota para editar um exame
-@app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
-def edit_exam(exam_id):
-    exam = Exam.query.get_or_404(exam_id)
-
-    if request.method == 'POST':
-        exam.patient_name = request.form['patient_name']
-        exam.category = request.form['category']
-        exam.subcategory = request.form['subcategory']
-        exam.result = request.form['result']
-        
-        details = {}
-        for key, value in request.form.items():
-            if key not in ['patient_name', 'category', 'subcategory', 'result']:
-                details[key] = value
-        exam.details = details
-        
-        db.session.commit()
-        return redirect(url_for('results'))
-    
-    return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
-
-# Rota para excluir um exame
-@app.route('/delete/<int:exam_id>', methods=['GET', 'POST'])
-def delete_exam(exam_id):
-    exam = Exam.query.get_or_404(exam_id)
-    db.session.delete(exam)
-    db.session.commit()
-    return redirect(url_for('results'))
 
 if __name__ == '__main__':
     with app.app_context():
