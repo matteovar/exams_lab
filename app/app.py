@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Exam
+from models import db, Exam, User
 from collections import defaultdict
 import json
 import os
@@ -72,18 +72,15 @@ def submit_exam():
     result = request.form.get('result', '')
 
     # Busca o paciente no banco de dados pelo nome
-    patient = Exam.query.filter_by(patient_name=patient_name).first()
+    user = User.query.filter_by(patient_name=patient_name).first()
 
-    if not patient:
+    if not user:
         flash('Paciente não encontrado. Por favor, cadastre o paciente primeiro.', 'error')
         return redirect(url_for('exame'))
 
-    # Cria o novo exame usando os dados do paciente existente
+    # Cria o novo exame associado ao usuário
     new_exam = Exam(
-        patient_name=patient_name,
-        cpf=patient.cpf,  # Usa o CPF do paciente já cadastrado
-        phone=patient.phone,  # Usa o telefone do paciente já cadastrado
-        address=patient.address,  # Usa o endereço do paciente já cadastrado
+        patient_name=patient_name,  # Associa o exame ao usuário
         category=category,
         subcategory=subcategory,
         result=result,
@@ -94,20 +91,34 @@ def submit_exam():
     db.session.commit()
     return redirect(url_for('results'))
 
+
 # Rota para exibir todos os resultados de exames
 @app.route('/results')
 def results():
     exams = Exam.query.all()
-    grouped_exams = defaultdict(lambda: {"category": None, "exams": []})
+    grouped_exams = defaultdict(lambda: {"category": None, "exams": [], "patient_info": {}})
+    
     for exam in exams:
+        # Busca as informações do paciente associado ao exame
+        user = User.query.filter_by(patient_name=exam.patient_name).first()
+        
+        if user:
+            grouped_exams[exam.patient_name]["patient_info"] = {
+                "cpf": user.cpf,
+                "phone": user.phone,
+                "address": user.address
+            }
+        
         if not grouped_exams[exam.patient_name]["category"]:
             grouped_exams[exam.patient_name]["category"] = exam.category
+        
         grouped_exams[exam.patient_name]["exams"].append({
             "id": exam.id,
             "subcategory": exam.subcategory,
             "result": exam.result,
             "details": exam.details
         })
+    
     return render_template('result.html', grouped_exams=grouped_exams)
 
 # Rota para a página de pesquisa do cliente
@@ -122,15 +133,13 @@ def client_record_search():
         subcategory = request.form['subcategory']
         
         # Salva os dados do cliente e do exame no banco de dados
-        new_exam = Exam(
+        new_exam = User(
             patient_name=patient_name,
             cpf=cpf,
             phone=phone,
             address=address,
             category=category,
-            subcategory=subcategory,
-            result="",  # Resultado vazio por enquanto
-            details={}  # Detalhes vazios por enquanto
+            subcategory=subcategory
         )
         db.session.add(new_exam)
         db.session.commit()
@@ -171,7 +180,7 @@ def delete_exam(exam_id):
 # Rota para exibir a ficha do cliente
 @app.route('/client_record/<string:patient_name>')
 def client_record(patient_name):
-    exams = Exam.query.filter_by(patient_name=patient_name).all()
+    exams = User.query.filter_by(patient_name=patient_name).all()
     
     if not exams:
         flash(f'Nenhum exame encontrado para o paciente: {patient_name}', 'warning')
@@ -190,8 +199,6 @@ def client_record(patient_name):
         grouped_exams[exam.category]["exams"].append({
             "id": exam.id,
             "subcategory": exam.subcategory,
-            "result": exam.result,
-            "details": exam.details
         })
     
     return render_template(

@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Exame</title>
-    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/exame.css') }}">
     <script>
         var examSubcategories = JSON.parse('{{ exam_subcategories|tojson|safe }}');
     </script>
-    <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
 </head>
 <body>
     <div class="sidebar">
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
         <div class="sidebar-content">
             <div class="sidebar-box">
                 <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
@@ -35,50 +34,51 @@
     </div>
 
     <div class="home-container">
-        <div class="form-container">
+        
             <form action="/submit" method="POST">
-                <div class="form-group">
-                    <label for="patient_name">Nome do Paciente:</label>
-                    <input type="text" id="patient_name" name="patient_name" required oninput="fetchPatientDetails(this.value)">
-                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="patient_name">Nome do Paciente:</label>
+                        <input type="text" id="patient_name" name="patient_name" required>
+                    </div>
 
-                <div class="form-group" id="patient_details" style="display: none;">
-                    <p><strong>CPF:</strong> <span id="cpf"></span></p>
-                    <p><strong>Telefone:</strong> <span id="phone"></span></p>
-                    <p><strong>Endereço:</strong> <span id="address"></span></p>
+                    <div class="form-group" id="patient_details" style="display: none;">
+                        <p><strong>CPF:</strong> <span id="cpf"></span></p>
+                        <p><strong>Telefone:</strong> <span id="phone"></span></p>
+                        <p><strong>Endereço:</strong> <span id="address"></span></p>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="category">Categoria:</label>
+                        <select id="category" name="category" onchange="loadSubcategories()" required>
+                            <option value="" disabled selected>Selecione a categoria</option>
+                            {% for exam in exam_types %}
+                                <option value="{{ exam }}">{{ exam }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subcategory">Subcategoria:</label>
+                        <select id="subcategory" name="subcategory" onchange="showFields()" required>
+                            <option value="" disabled selected>Selecione a subcategoria</option>
+                        </select>
+                    </div>
+
+                    <div class="dynamic-fields" id="fields-container">
+                        <!-- Campos dinâmicos serão adicionados aqui -->
+                    </div>
+                    <div class="form-group">
+                        <label for="general_result">Resultado Geral:</label>
+                        <input type="text" id="general_result" name="general_result" required>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="category">Categoria:</label>
-                    <select id="category" name="category" onchange="loadSubcategories()" required>
-                        <option value="" disabled selected>Selecione a categoria</option>
-                        {% for exam in exam_types %}
-                            <option value="{{ exam }}">{{ exam }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="subcategory">Subcategoria:</label>
-                    <select id="subcategory" name="subcategory" onchange="showFields()" required>
-                        <option value="" disabled selected>Selecione a subcategoria</option>
-                    </select>
-                </div>
-                
-                <div class="dynamic-fields" id="fields-container">
-                    <!-- Campos dinâmicos serão adicionados aqui -->
-                </div>
-                
-                <div class="form-group">
-                    <label for="result">Resultado Geral:</label>
-                    <input type="text" id="result" name="result" required>
-                </div>
-                
-                <div class="form-group">
-                    <button type="submit">Registrar Exame</button>
+        
+                <div class="button-container">
+                    <button type="submit" id="save-button">Registrar Exame</button>
                 </div>
             </form>
-        </div>
+        
+    </div>
         <button onclick="goBack()" class="btn-back">Voltar</button>
         
         <a href="/results">Ver Resultados</a>

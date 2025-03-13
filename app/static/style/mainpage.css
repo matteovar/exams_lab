@@ -95,10 +95,10 @@ body {
 .button-container {
     display: flex;
     justify-content: center; /* Centraliza os botões horizontalmente */
-    gap: 20px; /* Espaçamento entre os botões */
-    margin-top: 30px; /* Espaçamento acima dos botões */
-    width: 100%; /* Ocupa a largura total do formulário */
+    gap: 20px; /* Adiciona um espaçamento entre os botões */
+    margin-top: 20px; /* Espaçamento superior */
 }
+
 
 .main-menu-btn {
     background-size: cover; /* Faz a imagem cobrir todo o botão */
@@ -232,15 +232,11 @@ a:hover {
 }
 
 button {
-    background-color: #3498db;
-    color: white;
     padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
     font-size: 16px;
-    margin-top: 10px; /* Reduz o espaçamento acima do botão */
-    margin-bottom: 10px; /* Adiciona espaçamento abaixo do botão */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 /* Estilo para o container dos botões */
@@ -252,6 +248,20 @@ button {
     margin-top: 30px; /* Espaçamento acima dos botões */
 }
 
+.btn-back {
+    background-color: #6c757d; /* Cinza */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 auto; /* Centraliza horizontalmente */
+    display: block; /* Faz o botão ocupar a largura máxima */
+    width: fit-content; /* Ajusta a largura ao conteúdo */
+    text-align: center; /* Centraliza o texto */
+}
+
 /* Estilo para os botões */
 button[type="submit"], .btn-back {
     background-color: #3498db;
@@ -261,7 +271,10 @@ button[type="submit"], .btn-back {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-    width: auto; /* Largura automática para os botões */
+    margin: 0 auto;
+    display: block;
+    width: fit-content;
+    text-align: center; /* Largura automática para os botões */
 }
 button[type="submit"]:hover, .btn-back:hover {
     background-color: #2980b9;
@@ -294,6 +307,7 @@ button[type="submit"]:hover, .btn-back:hover {
     justify-content: center; /* Centraliza o conteúdo verticalmente */
     min-height: 100vh;
     padding: 20px;
+    gap: 20px;
 }
 
 .home-container form {
@@ -571,11 +585,14 @@ button[type="submit"]:hover, .btn-back:hover {
     transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
+
+
 .flash-success {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
 }
+
 
 .flash-error {
     background-color: #f8d7da;
@@ -598,6 +615,33 @@ button[type="submit"]:hover, .btn-back:hover {
 .flash-messages div.fade-out {
     animation: fadeOutUp 0.5s ease forwards;
 }
+
+#category-container {
+    display: flex;
+    flex-direction: row; /* Mantém os grupos empilhados */
+    gap: 10px;
+    align-items: center; /* Centraliza os elementos */
+}
+
+/* Estilos para cada grupo de categoria e subcategoria */
+.category-group {
+    display: flex;
+    flex-direction: row; /* Alinha os selects lado a lado */
+    justify-content: center; /* Centraliza os selects */
+    gap: 15px; /* Espaçamento entre os selects */
+    width: 100%; /* Garante que ocupa toda a largura disponível */
+}
+
+
+
+/* Estilo para os selects */
+.category-group select {
+    width: 100%; /* Ocupar todo o espaço disponível */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 
 /* Estilo para o botão de logout */
 .btn-logout {
