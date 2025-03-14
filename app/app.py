@@ -3,6 +3,11 @@ from models import db, Exam, User
 from collections import defaultdict
 import json
 import os
+from docx import Document
+from docx2pdf import convert
+import win32print
+import win32api
+import sqlite3
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exams.db'
@@ -23,6 +28,53 @@ with open(categories_path, 'r', encoding='utf-8') as file:
 
 with open(subcategories_path, 'r', encoding='utf-8') as file:
     EXAM_SUBCATEGORIES = json.load(file)
+
+# Função para gerar o documento Word e converter para PDF
+def gerar_documento(exam_id):
+    """Gera o documento Word e converte para PDF"""
+    conn = sqlite3.connect('instance/exams.db')
+    cursor = conn.cursor()
+
+    # Busca os dados do exame no banco de dados
+    cursor.execute("SELECT patient_name, category, result FROM exam WHERE id = ?", (exam_id,))
+    dados = cursor.fetchone()
+    conn.close()
+
+    if not dados:
+        return None
+
+    # Carrega o modelo do Word
+    doc = Document("db-to-docx/modelo.docx")
+
+    # Define os placeholders e seus valores
+    substituicoes = {
+        "{NOME}": dados[0],  # Nome do paciente
+        "{CATEGORIA}": dados[1],  # Categoria do exame
+        "{RESULTADO}": dados[2]  # Resultado do exame
+    }
+
+    # Substitui os placeholders no documento
+    for paragrafo in doc.paragraphs:
+        for chave, valor in substituicoes.items():
+            if chave in paragrafo.text:
+                paragrafo.text = paragrafo.text.replace(chave, str(valor))
+
+    # Salva o documento Word preenchido
+    doc_word = "db-to-docx/relatorio_preenchido.docx"
+    doc.save(doc_word)
+
+    # Converte o Word para PDF
+    convert(doc_word)
+    doc_pdf = "db-to-docx/relatorio_preenchido.pdf"
+
+    return doc_pdf
+
+# Função para enviar o PDF para a impressora
+def imprimir_pdf(pdf_path):
+    """Envia o PDF para a impressora"""
+    printer_name = win32print.GetDefaultPrinter()
+    win32api.ShellExecute(0, "print", pdf_path, None, ".", 0)
+
 
 # Rota para a raiz (/) - Redireciona para a página inicial
 @app.route('/')
@@ -62,9 +114,19 @@ def get_patient_details():
         })
     else:
         return jsonify({}), 404
+    
+@app.route('/gerar-imprimir/<int:exam_id>', methods=['POST'])
+def gerar_imprimir(exam_id):
+    # Gera o documento Word e converte para PDF
+    pdf_gerado = gerar_documento(exam_id)
+    if pdf_gerado:
+        # Envia o PDF para a impressora
+        imprimir_pdf(pdf_gerado)
+        return jsonify({"status": "success", "message": "Documento gerado e enviado para impressão!"})
+    else:
+        return jsonify({"status": "error", "message": "Erro ao gerar o documento."})
 
 
-# Rota para editar um exame
 # Rota para editar um exame
 @app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
 def edit_exam(exam_id):
@@ -92,9 +154,6 @@ def edit_exam(exam_id):
 
     # Se for uma requisição GET, exibe o formulário de edição
     return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
-
-# Rota para remover um exame
-
 
 # Rota para registrar exame
 @app.route('/submit', methods=['POST'])
@@ -171,26 +230,41 @@ def client_record_search():
         cpf = request.form['cpf']
         phone = request.form['phone']
         address = request.form['address']
-        category = request.form['category']
-        subcategory = request.form['subcategory']
-        
-        # Salva os dados do cliente e do exame no banco de dados
-        new_exam = User(
+
+        # Salva os dados do cliente
+        new_client = User(
             patient_name=patient_name,
             cpf=cpf,
             phone=phone,
-            address=address,
-            category=category,
-            subcategory=subcategory
+            address=address
         )
-        db.session.add(new_exam)
+        db.session.add(new_client)
         db.session.commit()
-        
-        flash('Ficha do cliente e exame salvos com sucesso!', 'success')
+
+        # Processa os exames enviados
+        exam_count = 0
+        while f'category_{exam_count}' in request.form:
+            category = request.form[f'category_{exam_count}']
+            subcategory = request.form[f'subcategory_{exam_count}']
+
+            # Salva o exame associado ao cliente
+            new_exam = Exam(
+                patient_name=patient_name,
+                category=category,
+                subcategory=subcategory,
+                result='',  # Resultado pode ser preenchido posteriormente
+                details={}   # Detalhes podem ser preenchidos posteriormente
+            )
+            db.session.add(new_exam)
+            exam_count += 1
+
+        db.session.commit()
+        flash('Ficha do cliente e exames salvos com sucesso!', 'success')
         return redirect(url_for('client_record', patient_name=patient_name))
-    
+
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
+# Rota para remover um exame
 @app.route('/delete/<int:exam_id>', methods=['POST'])
 def delete_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)  # Busca o exame pelo ID
