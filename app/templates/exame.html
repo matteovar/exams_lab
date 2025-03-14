@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Exame</title>
-    <link rel="stylesheet" type = "text/css" href="{{ url_for('static', filename='style/exame.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/exame.css') }}">
     <script>
         var examSubcategories = JSON.parse('{{ exam_subcategories|tojson|safe }}');
     </script>
@@ -34,61 +34,80 @@
     </div>
 
     <div class="home-container">
-        
-            <form action="/submit" method="POST">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="patient_name">Nome do Paciente:</label>
-                        <input type="text" id="patient_name" name="patient_name" required>
+        <form action="/submit" method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="patient_name">Nome do Paciente:</label>
+                    <input type="text" id="patient_name" name="patient_name" required>
+                </div>
+
+                <div class="form-group" id="patient_details" style="display: none;">
+                    <p><strong>CPF:</strong> <span id="cpf"></span></p>
+                    <p><strong>Telefone:</strong> <span id="phone"></span></p>
+                    <p><strong>Endereço:</strong> <span id="address"></span></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Categoria:</label>
+                    <select id="category" name="category" onchange="loadSubcategories()" required>
+                        <option value="" disabled selected>Selecione a categoria</option>
+                        {% for exam in exam_types %}
+                            <option value="{{ exam }}">{{ exam }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subcategory">Subcategoria:</label>
+                    <select id="subcategory" name="subcategory" onchange="showFields()" required>
+                        <option value="" disabled selected>Selecione a subcategoria</option>
+                    </select>
+                </div>
+
+                <div class="dynamic-fields" id="fields-container">
+                    <label for="details">Detalhes</label>
+                    <div id="details-container">
+                        <div class="detail-field">
+                            <input type="text" name="detail_key_1" placeholder="Chave">
+                            <input type="text" name="detail_value_1" placeholder="Valor">
+                        </div>
+                    </div>
                     </div>
 
-                    <div class="form-group" id="patient_details" style="display: none;">
-                        <p><strong>CPF:</strong> <span id="cpf"></span></p>
-                        <p><strong>Telefone:</strong> <span id="phone"></span></p>
-                        <p><strong>Endereço:</strong> <span id="address"></span></p>
-                    </div>
-    
-                    <div class="form-group">
-                        <label for="category">Categoria:</label>
-                        <select id="category" name="category" onchange="loadSubcategories()" required>
-                            <option value="" disabled selected>Selecione a categoria</option>
-                            {% for exam in exam_types %}
-                                <option value="{{ exam }}">{{ exam }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="subcategory">Subcategoria:</label>
-                        <select id="subcategory" name="subcategory" onchange="showFields()" required>
-                            <option value="" disabled selected>Selecione a subcategoria</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="result">Resultado Geral:</label>
+                    <input type="text" id="result" name="result" required>
+                </div>
+            </div>
 
-                    <div class="dynamic-fields" id="fields-container">
-                        <!-- Campos dinâmicos serão adicionados aqui -->
-                    </div>
-                    <div class="form-group">
-                        <label for="general_result">Resultado Geral:</label>
-                        <input type="text" id="general_result" name="general_result" required>
-                    </div>
+            <div class="button-container">
+                <a href="/results" class="btn-ver-resultados">Ver Resultados</a>
+                <div class="btn-group">
+                    <button onclick="goBack()" class="btn-back">Voltar</button>
+                    <button type="submit" id="save-button">Registrar Exame</button>
                 </div>
-        
-                <div class="button-container">
-                    <!-- Link "Ver Resultados" -->
-                    <a href="/results" class="btn-ver-resultados">Ver Resultados</a>
-                
-                    <!-- Botões "Voltar" e "Registrar Exame" -->
-                    <div class="btn-group">
-                        <button onclick="goBack()" class="btn-back">Voltar</button>
-                        <button type="submit" id="save-button">Registrar Exame</button>
-                    </div>
-                </div>
-                
-        <script>
-            function goBack() {
-                window.history.back();
-            }
-        </script>
+            </div>
+        </form>
     </div>
+
+    <script>
+        let detailCount = 1;
+
+        function addDetailField() {
+            detailCount++;
+            const container = document.getElementById('details-container');
+            const newField = document.createElement('div');
+            newField.className = 'detail-field';
+            newField.innerHTML = `
+                <input type="text" name="detail_key_${detailCount}" placeholder="Chave">
+                <input type="text" name="detail_value_${detailCount}" placeholder="Valor">
+            `;
+            container.appendChild(newField);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>

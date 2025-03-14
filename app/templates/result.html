@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados dos Exames</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/results.css') }}">
 </head>
 <body>
     <div class="sidebar">
@@ -39,15 +39,21 @@
                     <p><strong>Telefone:</strong> {{ data.patient_info.phone }}</p>
                     <p><strong>Endereço:</strong> {{ data.patient_info.address }}</p>
                 </div>
+                <h3>Exames Realizados:</h3>
                 <div class="exams-list">
-                    <h3>Exames Realizados:</h3>
                     {% for exam in data.exams %}
                         <div class="exam-card">
-                            <p><strong>Categoria:</strong> {{ data.category }}</p>
-                            <p><strong>Subcategoria:</strong> {{ exam.subcategory }}</p>
-                            <p><strong>Resultado:</strong> {{ exam.result }}</p>
+                            <div class="exam-line">
+                                <p><strong>Categoria:</strong> {{ data.category }}</p>
+                            </div>
+                            <div class="exam-line">
+                                <p><strong>Subcategoria:</strong> {{ exam.subcategory }}</p>
+                            </div>
+                            <div class="exam-line">
+                                <p><strong>Resultado:</strong> {{ exam.result }}</p>
+                            </div>
                             {% if exam.details %}
-                                <div class="exam-details">
+                                <div class="details-box">
                                     <h4>Detalhes:</h4>
                                     <ul>
                                         {% for key, value in exam.details.items() %}
@@ -56,6 +62,13 @@
                                     </ul>
                                 </div>
                             {% endif %}
+                            <!-- Botões de Editar e Remover -->
+                            <div class="exam-actions">
+                                <a href="{{ url_for('edit_exam', exam_id=exam.id) }}" class="btn-edit">Editar</a>
+                                <form action="{{ url_for('delete_exam', exam_id=exam.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn-delete">Remover</button>
+                                </form>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>

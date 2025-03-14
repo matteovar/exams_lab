@@ -63,13 +63,47 @@ def get_patient_details():
     else:
         return jsonify({}), 404
 
+
+# Rota para editar um exame
+# Rota para editar um exame
+@app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
+def edit_exam(exam_id):
+    exam = Exam.query.get_or_404(exam_id)  # Busca o exame pelo ID
+
+    if request.method == 'POST':
+        # Atualiza os dados do exame com os valores do formulário
+        exam.patient_name = request.form['patient_name']
+        exam.category = request.form['category']
+        exam.subcategory = request.form['subcategory']
+        exam.result = request.form['result']
+
+        # Atualiza os detalhes do exame
+        details = {}
+        for key, value in request.form.items():
+            if key.startswith('detail_key_') and value:
+                detail_number = key.split('_')[-1]
+                detail_value = request.form.get(f'detail_value_{detail_number}', '')
+                if detail_value:
+                    details[value] = detail_value
+        exam.details = details
+
+        db.session.commit()  # Salva as alterações no banco de dados
+        return redirect(url_for('results'))
+
+    # Se for uma requisição GET, exibe o formulário de edição
+    return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
+
+# Rota para remover um exame
+
+
 # Rota para registrar exame
 @app.route('/submit', methods=['POST'])
 def submit_exam():
+    # Captura os dados do formulário
     patient_name = request.form['patient_name']
     category = request.form['category']
     subcategory = request.form['subcategory']
-    result = request.form.get('result', '')
+    result = request.form.get('result', '')  # Captura o resultado
 
     # Busca o paciente no banco de dados pelo nome
     user = User.query.filter_by(patient_name=patient_name).first()
@@ -78,19 +112,27 @@ def submit_exam():
         flash('Paciente não encontrado. Por favor, cadastre o paciente primeiro.', 'error')
         return redirect(url_for('exame'))
 
+    # Captura os detalhes do exame
+    details = {}
+    for key, value in request.form.items():
+        if key.startswith('detail_key_') and value:  # Verifica se é um campo de detalhe e se tem valor
+            detail_number = key.split('_')[-1]  # Extrai o número do campo (ex: "1" de "detail_key_1")
+            detail_value = request.form.get(f'detail_value_{detail_number}', '')  # Captura o valor correspondente
+            if detail_value:  # Só adiciona se o valor não estiver vazio
+                details[value] = detail_value
+
     # Cria o novo exame associado ao usuário
     new_exam = Exam(
         patient_name=patient_name,  # Associa o exame ao usuário
         category=category,
         subcategory=subcategory,
-        result=result,
-        details={}  # Adicione os detalhes específicos do exame aqui, se necessário
+        result=result,  # Salva o resultado
+        details=details  # Salva os detalhes como um dicionário JSON
     )
 
     db.session.add(new_exam)
     db.session.commit()
     return redirect(url_for('results'))
-
 
 # Rota para exibir todos os resultados de exames
 @app.route('/results')
@@ -149,32 +191,11 @@ def client_record_search():
     
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
-@app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
-def edit_exam(exam_id):
-    exam = Exam.query.get_or_404(exam_id)
-
-    if request.method == 'POST':
-        exam.patient_name = request.form['patient_name']
-        exam.category = request.form['category']
-        exam.subcategory = request.form['subcategory']
-        exam.result = request.form['result']
-        
-        details = {}
-        for key, value in request.form.items():
-            if key not in ['patient_name', 'category', 'subcategory', 'result']:
-                details[key] = value
-        exam.details = details
-        
-        db.session.commit()
-        return redirect(url_for('results'))
-    
-    return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
-
-@app.route('/delete/<int:exam_id>', methods=['GET', 'POST'])
+@app.route('/delete/<int:exam_id>', methods=['POST'])
 def delete_exam(exam_id):
-    exam = Exam.query.get_or_404(exam_id)
-    db.session.delete(exam)
-    db.session.commit()
+    exam = Exam.query.get_or_404(exam_id)  # Busca o exame pelo ID
+    db.session.delete(exam)  # Remove o exame do banco de dados
+    db.session.commit()  # Salva as alterações
     return redirect(url_for('results'))
 
 # Rota para exibir a ficha do cliente

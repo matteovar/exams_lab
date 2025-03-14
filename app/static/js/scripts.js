@@ -256,6 +256,7 @@ function loadSubcategories() {
 }
 
 // Função para mostrar campos específicos da subcategoria
+// Função para mostrar campos específicos da subcategoria
 function showFields() {
     var subcategory = document.getElementById("subcategory").value;
     var fieldsContainer = document.getElementById("fields-container");
@@ -265,26 +266,30 @@ function showFields() {
 
     // Mostra os campos específicos da subcategoria selecionada
     if (subcategory && subcategoryFields[subcategory]) {
-        subcategoryFields[subcategory].forEach(function(field) {
+        subcategoryFields[subcategory].forEach(function(field, index) {
+            var detailNumber = index + 1;  // Começa em 1
+
             var label = document.createElement("label");
             label.textContent = field + ":";
-            label.setAttribute("for", field.toLowerCase().replace(/ /g, "_"));
+            label.setAttribute("for", `detail_key_${detailNumber}`);
 
-            var input = document.createElement("input");
-            input.type = "text";
-            input.id = field.toLowerCase().replace(/ /g, "_");
-            input.name = field.toLowerCase().replace(/ /g, "_");
-            input.required = true;
+            var inputKey = document.createElement("input");
+            inputKey.type = "text";
+            inputKey.id = `detail_key_${detailNumber}`;
+            inputKey.name = `detail_key_${detailNumber}`;
+            inputKey.placeholder = "Chave";
+            inputKey.value = field;  // Define o valor como o nome do campo
+
+            var inputValue = document.createElement("input");
+            inputValue.id = `detail_value_${detailNumber}`;
+            inputValue.name = `detail_value_${detailNumber}`;
+            inputValue.placeholder = "Valor";
 
             fieldsContainer.appendChild(label);
-            fieldsContainer.appendChild(input);
+            fieldsContainer.appendChild(inputKey);
+            fieldsContainer.appendChild(inputValue);
             fieldsContainer.appendChild(document.createElement("br"));
         });
-
-        // Ajusta o scroll da página para manter a posição do home-container
-        setTimeout(() => {
-            window.scrollBy(0, fieldsContainer.offsetHeight);
-        }, 0);
     }
 }
 
