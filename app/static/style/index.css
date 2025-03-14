@@ -31,10 +31,6 @@ body {
     transition: left 0.3s ease; /* Animação ao abrir/fechar */
 }
 
-.sidebar.active {
-    left: 0; /* Mostra o menu quando ativo */
-}
-
 .sidebar-content {
     padding: 20px;
     padding-top: 70px; /* Espaçamento para o topo */

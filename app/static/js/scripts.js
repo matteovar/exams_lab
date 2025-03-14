@@ -280,6 +280,11 @@ function showFields() {
             fieldsContainer.appendChild(input);
             fieldsContainer.appendChild(document.createElement("br"));
         });
+
+        // Ajusta o scroll da página para manter a posição do home-container
+        setTimeout(() => {
+            window.scrollBy(0, fieldsContainer.offsetHeight);
+        }, 0);
     }
 }
 

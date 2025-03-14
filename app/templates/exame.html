@@ -74,15 +74,16 @@
                 </div>
         
                 <div class="button-container">
-                    <button type="submit" id="save-button">Registrar Exame</button>
+                    <!-- Link "Ver Resultados" -->
+                    <a href="/results" class="btn-ver-resultados">Ver Resultados</a>
+                
+                    <!-- Botões "Voltar" e "Registrar Exame" -->
+                    <div class="btn-group">
+                        <button onclick="goBack()" class="btn-back">Voltar</button>
+                        <button type="submit" id="save-button">Registrar Exame</button>
+                    </div>
                 </div>
-            </form>
-        
-    </div>
-        <button onclick="goBack()" class="btn-back">Voltar</button>
-        
-        <a href="/results">Ver Resultados</a>
-        
+                
         <script>
             function goBack() {
                 window.history.back();
