@@ -230,13 +230,17 @@ def client_record_search():
         cpf = request.form['cpf']
         phone = request.form['phone']
         address = request.form['address']
+        category=category = request.form['category']
+        subcategory= request.form['subcategory']
 
         # Salva os dados do cliente
         new_client = User(
             patient_name=patient_name,
             cpf=cpf,
             phone=phone,
-            address=address
+            address=address,
+            category=category,
+            subcategory=subcategory
         )
         db.session.add(new_client)
         db.session.commit()

@@ -25,8 +25,8 @@ class User(db.Model):
     cpf = db.Column(db.String(14), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     address = db.Column(db.String(200), nullable=False)
-    category = db.Column(db.String(100), nullable=False)
-    subcategory = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(100), nullable=True)  # Allow NULL values
+    subcategory = db.Column(db.String(100), nullable=True)  # Allow NULL values
 
     def __repr__(self):
         return f"<User {self.patient_name}>"
