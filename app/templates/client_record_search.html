@@ -73,18 +73,15 @@
             window.history.back();
         }
 
-        // Função para carregar subcategorias dinamicamente
         function loadSubcategories() {
             var category = document.getElementById("category").value;
             var subcategorySelect = document.getElementById("subcategory");
             
-            // Limpa as opções atuais
             subcategorySelect.innerHTML = '<option value="" disabled selected>Selecione a subcategoria</option>';
             
-            // Carrega as subcategorias correspondentes
             if (category) {
                 var subcategories = JSON.parse('{{ exam_subcategories|tojson|safe }}');
-                console.log(subcategories);  // Verifique se o objeto está correto
+                console.log(subcategories);  
                 subcategories[category].forEach(function(subcat) {
                     var option = document.createElement("option");
                     option.value = subcat;

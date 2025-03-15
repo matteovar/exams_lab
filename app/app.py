@@ -1,45 +1,48 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, send_file, url_for, flash, jsonify
 from models import db, Exam, User
 from collections import defaultdict
 import json
+from docx import Document
+from docx2pdf import convert
 import os
+import pythoncom 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exams.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'sua_chave_secreta_aqui'
 
-# Inicializa o banco de dados
+
 db.init_app(app)
 
-# Caminho para os arquivos JSON dentro da subpasta 'info'
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 categories_path = os.path.join(current_dir, 'static', 'infos', 'categorias.json')
 subcategories_path = os.path.join(current_dir, 'static', 'infos', 'subcategories.json')
 
-# Carrega as categorias e subcategorias dos arquivos JSON
+
 with open(categories_path, 'r', encoding='utf-8') as file:
     EXAM_TYPES = json.load(file)
 
 with open(subcategories_path, 'r', encoding='utf-8') as file:
     EXAM_SUBCATEGORIES = json.load(file)
 
-# Rota para a raiz (/) - Redireciona para a página inicial
+
 @app.route('/')
 def root():
     return redirect(url_for('home'))
 
-# Rota para a página inicial
+
 @app.route('/home')
 def home():
     return render_template('index.html')
 
-# Rota para a página de exame
+
 @app.route('/exame')
 def exame():
     return render_template('exame.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
-# Rota para gerar etiqueta
+
 @app.route('/generate_label', methods=['GET', 'POST'])
 def generate_label():
     if request.method == 'POST':
@@ -48,7 +51,7 @@ def generate_label():
         return render_template('label.html', patient_name=patient_name, exam_type=exam_type)
     return render_template('generate_label.html', exam_types=EXAM_TYPES)
 
-# Rota para buscar os detalhes do paciente
+
 @app.route('/get_patient_details')
 def get_patient_details():
     patient_name = request.args.get('patient_name')
@@ -64,20 +67,19 @@ def get_patient_details():
         return jsonify({}), 404
 
 
-# Rota para editar um exame
-# Rota para editar um exame
+
 @app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
 def edit_exam(exam_id):
-    exam = Exam.query.get_or_404(exam_id)  # Busca o exame pelo ID
+    exam = Exam.query.get_or_404(exam_id)  
 
     if request.method == 'POST':
-        # Atualiza os dados do exame com os valores do formulário
+        
         exam.patient_name = request.form['patient_name']
         exam.category = request.form['category']
         exam.subcategory = request.form['subcategory']
         exam.result = request.form['result']
 
-        # Atualiza os detalhes do exame
+        
         details = {}
         for key, value in request.form.items():
             if key.startswith('detail_key_') and value:
@@ -87,61 +89,61 @@ def edit_exam(exam_id):
                     details[value] = detail_value
         exam.details = details
 
-        db.session.commit()  # Salva as alterações no banco de dados
+        db.session.commit()  
         return redirect(url_for('results'))
 
-    # Se for uma requisição GET, exibe o formulário de edição
+    
     return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
-# Rota para remover um exame
 
 
-# Rota para registrar exame
+
+
 @app.route('/submit', methods=['POST'])
 def submit_exam():
-    # Captura os dados do formulário
+    
     patient_name = request.form['patient_name']
     category = request.form['category']
     subcategory = request.form['subcategory']
-    result = request.form.get('result', '')  # Captura o resultado
+    result = request.form.get('result', '')  
 
-    # Busca o paciente no banco de dados pelo nome
+    
     user = User.query.filter_by(patient_name=patient_name).first()
 
     if not user:
         flash('Paciente não encontrado. Por favor, cadastre o paciente primeiro.', 'error')
         return redirect(url_for('exame'))
 
-    # Captura os detalhes do exame
+    
     details = {}
     for key, value in request.form.items():
-        if key.startswith('detail_key_') and value:  # Verifica se é um campo de detalhe e se tem valor
-            detail_number = key.split('_')[-1]  # Extrai o número do campo (ex: "1" de "detail_key_1")
-            detail_value = request.form.get(f'detail_value_{detail_number}', '')  # Captura o valor correspondente
-            if detail_value:  # Só adiciona se o valor não estiver vazio
+        if key.startswith('detail_key_') and value:  
+            detail_number = key.split('_')[-1]  
+            detail_value = request.form.get(f'detail_value_{detail_number}', '')  
+            if detail_value:  
                 details[value] = detail_value
 
-    # Cria o novo exame associado ao usuário
+    
     new_exam = Exam(
-        patient_name=patient_name,  # Associa o exame ao usuário
+        patient_name=patient_name,  
         category=category,
         subcategory=subcategory,
-        result=result,  # Salva o resultado
-        details=details  # Salva os detalhes como um dicionário JSON
+        result=result,  
+        details=details  
     )
 
     db.session.add(new_exam)
     db.session.commit()
     return redirect(url_for('results'))
 
-# Rota para exibir todos os resultados de exames
+
 @app.route('/results')
 def results():
     exams = Exam.query.all()
     grouped_exams = defaultdict(lambda: {"category": None, "exams": [], "patient_info": {}})
     
     for exam in exams:
-        # Busca as informações do paciente associado ao exame
+        
         user = User.query.filter_by(patient_name=exam.patient_name).first()
         
         if user:
@@ -163,7 +165,7 @@ def results():
     
     return render_template('result.html', grouped_exams=grouped_exams)
 
-# Rota para a página de pesquisa do cliente
+
 @app.route('/client_record_search', methods=['GET', 'POST'])
 def client_record_search():
     if request.method == 'POST':
@@ -174,7 +176,7 @@ def client_record_search():
         category = request.form['category']
         subcategory = request.form['subcategory']
         
-        # Salva os dados do cliente e do exame no banco de dados
+        
         new_exam = User(
             patient_name=patient_name,
             cpf=cpf,
@@ -193,12 +195,12 @@ def client_record_search():
 
 @app.route('/delete/<int:exam_id>', methods=['POST'])
 def delete_exam(exam_id):
-    exam = Exam.query.get_or_404(exam_id)  # Busca o exame pelo ID
-    db.session.delete(exam)  # Remove o exame do banco de dados
-    db.session.commit()  # Salva as alterações
+    exam = Exam.query.get_or_404(exam_id)  
+    db.session.delete(exam)  
+    db.session.commit()  
     return redirect(url_for('results'))
 
-# Rota para exibir a ficha do cliente
+
 @app.route('/client_record/<string:patient_name>')
 def client_record(patient_name):
     exams = User.query.filter_by(patient_name=patient_name).all()
@@ -207,14 +209,14 @@ def client_record(patient_name):
         flash(f'Nenhum exame encontrado para o paciente: {patient_name}', 'warning')
         return redirect(url_for('client_record_search'))
     
-    # Pega as informações do cliente do primeiro exame (já que são as mesmas para todos os exames)
+    
     client_info = {
         "cpf": exams[0].cpf,
         "phone": exams[0].phone,
         "address": exams[0].address
     }
     
-    # Agrupa os exames por categoria
+    
     grouped_exams = defaultdict(lambda: {"exams": []})
     for exam in exams:
         grouped_exams[exam.category]["exams"].append({
@@ -231,7 +233,66 @@ def client_record(patient_name):
         grouped_exams=grouped_exams
     )
 
+from docx import Document
+from docx2pdf import convert
+import os
+import pythoncom  # Importe o pythoncom para inicializar o CoInitialize
+
+@app.route('/generate_word/<string:patient_name>')
+def generate_word(patient_name):
+    # Buscar as informações do paciente
+    user = User.query.filter_by(patient_name=patient_name).first()
+    exams = Exam.query.filter_by(patient_name=patient_name).all()
+
+    if not user or not exams:
+        flash('Paciente ou exames não encontrados.', 'error')
+        return redirect(url_for('results'))
+
+    # Criar um documento Word
+    doc = Document()
+    doc.add_heading(f'Relatório de Exames - {patient_name}', 0)
+
+    # Adicionar informações do paciente
+    doc.add_heading('Informações do Paciente', level=1)
+    doc.add_paragraph(f'Nome: {user.patient_name}')
+    doc.add_paragraph(f'CPF: {user.cpf}')
+    doc.add_paragraph(f'Telefone: {user.phone}')
+    doc.add_paragraph(f'Endereço: {user.address}')
+
+    # Adicionar informações dos exames
+    doc.add_heading('Exames Realizados', level=1)
+    for exam in exams:
+        doc.add_heading(f'Categoria: {exam.category}', level=2)
+        doc.add_paragraph(f'Subcategoria: {exam.subcategory}')
+        doc.add_paragraph(f'Resultado: {exam.result}')
+        if exam.details:
+            doc.add_paragraph('Detalhes:')
+            for key, value in exam.details.items():
+                doc.add_paragraph(f'{key}: {value}')
+
+    # Salvar o documento Word
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    word_path = os.path.join(current_dir, 'static', 'reports', f'{patient_name}_report.docx')
+    pdf_path = os.path.join(current_dir, 'static', 'reports', f'{patient_name}_report.pdf')
+    
+    # Certifique-se de que o diretório existe
+    os.makedirs(os.path.dirname(word_path), exist_ok=True)
+    
+    doc.save(word_path)
+
+    # Inicializar o CoInitialize antes de converter o Word para PDF
+    pythoncom.CoInitialize()  # Inicializa o CoInitialize
+
+    try:
+        # Converter o Word para PDF
+        convert(word_path, pdf_path)
+    finally:
+        pythoncom.CoUninitialize()  # Finaliza o CoInitialize
+
+    # Retornar o arquivo PDF para download
+    return send_file(pdf_path, as_attachment=True)
+
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Cria as tabelas no banco de dados
+        db.create_all()  
     app.run(debug=True)

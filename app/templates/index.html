@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
 </head>
 <body>
-    <!-- Barra Lateral Fixa -->
     <div class="sidebar">
         <div class="sidebar-content">
             <div class="sidebar-box">
@@ -20,13 +19,11 @@
         </div>
     </div>
 
-    <!-- Conteúdo Principal -->
     <div class="main-content">
         <div class="fixed-header">
             <h1>Bem-vindo!</h1>
         </div>
 
-        <!-- Botões Grandes na Tela Inicial -->
         <div class="button-container">
             <a href="{{ url_for('exame') }}" class="main-menu-btn btn-registrar-exame">Registrar Exame</a>
             <a href="{{ url_for('generate_label') }}" class="main-menu-btn btn-gerar-etiqueta">Gerar Etiqueta</a>

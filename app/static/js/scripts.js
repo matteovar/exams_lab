@@ -1,4 +1,4 @@
-// Campos específicos para cada subcategoria
+
 const subcategoryFields = {
     "Hemograma Completo": ["Hemoglobina", "Hematócrito", "Contagem de glóbulos vermelhos", "Contagem de leucócitos", "Contagem de plaquetas", "Índices hematimétricos (VCM, HCM, CHCM)"],
     "Coagulação": ["Fatores de coagulação", "Tempo de coagulação"],
@@ -236,15 +236,15 @@ const subcategoryFields = {
     "Anticorpos Anti-Músculo Liso": ["Indicador de hepatite autoimune"]
 };
 
-// Função para carregar subcategorias dinamicamente
+
 function loadSubcategories() {
     var category = document.getElementById("category").value;
     var subcategorySelect = document.getElementById("subcategory");
 
-    // Limpa as opções atuais
+    
     subcategorySelect.innerHTML = '<option value="" disabled selected>Selecione a subcategoria</option>';
 
-    // Carrega as subcategorias correspondentes
+    
     if (category && examSubcategories[category]) {
         examSubcategories[category].forEach(function(subcat) {
             var option = document.createElement("option");
@@ -255,19 +255,18 @@ function loadSubcategories() {
     }
 }
 
-// Função para mostrar campos específicos da subcategoria
-// Função para mostrar campos específicos da subcategoria
+
 function showFields() {
     var subcategory = document.getElementById("subcategory").value;
     var fieldsContainer = document.getElementById("fields-container");
 
-    // Limpa os campos anteriores
+    
     fieldsContainer.innerHTML = "";
 
-    // Mostra os campos específicos da subcategoria selecionada
+    
     if (subcategory && subcategoryFields[subcategory]) {
         subcategoryFields[subcategory].forEach(function(field, index) {
-            var detailNumber = index + 1;  // Começa em 1
+            var detailNumber = index + 1;  
 
             var label = document.createElement("label");
             label.textContent = field + ":";
@@ -278,7 +277,7 @@ function showFields() {
             inputKey.id = `detail_key_${detailNumber}`;
             inputKey.name = `detail_key_${detailNumber}`;
             inputKey.placeholder = "Chave";
-            inputKey.value = field;  // Define o valor como o nome do campo
+            inputKey.value = field;  
 
             var inputValue = document.createElement("input");
             inputValue.id = `detail_value_${detailNumber}`;
@@ -293,56 +292,42 @@ function showFields() {
     }
 }
 
-// Alternar menu lateral
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('active');
 }
 
-
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
-        }
-
-        function fetchPatientDetails(patientName) {
-            fetch(`/get_patient_details?patient_name=${patientName}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data) {
-                        document.getElementById('cpf').textContent = data.cpf;
-                        document.getElementById('phone').textContent = data.phone;
-                        document.getElementById('address').textContent = data.address;
-                        //document.getElementById('patient_details').style.display = 'block';
-                    } else {
-                        document.getElementById('patient_details').style.display = 'none';
-                        alert('Paciente não encontrado. Por favor, cadastre o paciente primeiro.');
-                    }
-                });
-        }
-
-        function loadSubcategories() {
-            var category = document.getElementById("category").value;
-            var subcategorySelect = document.getElementById("subcategory");
-            
-            // Limpa as opções atuais
-            subcategorySelect.innerHTML = '<option value="" disabled selected>Selecione a subcategoria</option>';
-            
-            // Carrega as subcategorias correspondentes
-            if (category) {
-                examSubcategories[category].forEach(function(subcat) {
-                    var option = document.createElement("option");
-                    option.value = subcat;
-                    option.text = subcat;
-                    subcategorySelect.appendChild(option);
-                });
+function fetchPatientDetails(patientName) {
+    fetch(`/get_patient_details?patient_name=${patientName}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data) {
+                document.getElementById('cpf').textContent = data.cpf;
+                document.getElementById('phone').textContent = data.phone;
+                document.getElementById('address').textContent = data.address;
+            } else {
+                document.getElementById('patient_details').style.display = 'none';
+                alert('Paciente não encontrado. Por favor, cadastre o paciente primeiro.');
             }
-        }
+        });
+}
+
+function loadSubcategories() {
+    var category = document.getElementById("category").value;
+    var subcategorySelect = document.getElementById("subcategory");
+            
+        subcategorySelect.innerHTML = '<option value="" disabled selected>Selecione a subcategoria</option>';
+            
+        if (category) {
+            examSubcategories[category].forEach(function(subcat) {
+            var option = document.createElement("option");
+            option.value = subcat;
+            option.text = subcat;
+            subcategorySelect.appendChild(option);
+        });
+    }
+}
    
-
-
-
-// Voltar para a página anterior
 function goBack() {
     window.history.back();
 }

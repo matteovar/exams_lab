@@ -71,12 +71,22 @@
                             </div>
                         </div>
                     {% endfor %}
+                    
                 </div>
+                
             </div>
         {% endfor %}
+        <div class="button-center-container">
+            <div class="button-container">
+                <button onclick="goBack()" class="btn-back">Voltar</button>
+                {% for patient_name, data in grouped_exams.items() %}
+                    <a href="{{ url_for('generate_word', patient_name=patient_name) }}" class="btn-generate">Gerar Word/PDF</a>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
-    <button onclick="goBack()" class="btn-back">Voltar</button>
+
 
     <script>
         function goBack() {

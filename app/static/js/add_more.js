@@ -1,4 +1,3 @@
-// Função para adicionar mais campos de categoria e subcategoria
 function addCategoryField() {
     const container = document.getElementById('category-container');
 
@@ -29,7 +28,6 @@ function addCategoryField() {
     container.appendChild(newCategoryGroup);
 }
 
-// Função para carregar subcategorias ao selecionar uma categoria
 function loadSubcategories(categorySelect) {
     const selectedCategory = categorySelect.value;
     const subcategorySelect = categorySelect.parentElement.nextElementSibling.querySelector('select');
@@ -46,13 +44,11 @@ function loadSubcategories(categorySelect) {
     }
 }
 
-// Função para alternar o menu lateral
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('active');
 }
 
-// Função para voltar à página anterior
 function goBack() {
     window.history.back();
 }

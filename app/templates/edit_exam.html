@@ -54,7 +54,6 @@
                 <input type="text" id="result" name="result" value="{{ exam.result }}" required>
             </div>
 
-            <!-- Campos dinâmicos para detalhes -->
             <div id="details-container">
                 {% if exam.details %}
                     {% for key, value in exam.details.items() %}

@@ -33,11 +33,11 @@ class User(db.Model):
 
 class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    patient_name= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Relação com User
+    patient_name= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  
     category = db.Column(db.String(100), nullable=False)
     subcategory = db.Column(db.String(100), nullable=False)
     result = db.Column(db.String(100), nullable=False)
-    details = db.Column(JSON)  # Campo JSON para armazenar os detalhes específicos
+    details = db.Column(JSON)  
 
     def __repr__(self):
         return f"<Exam {self.category} - {self.subcategory}>"
