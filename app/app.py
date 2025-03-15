@@ -27,7 +27,6 @@ with open(categories_path, 'r', encoding='utf-8') as file:
 with open(subcategories_path, 'r', encoding='utf-8') as file:
     EXAM_SUBCATEGORIES = json.load(file)
 
-
 @app.route('/')
 def root():
     return redirect(url_for('home'))
@@ -65,7 +64,17 @@ def get_patient_details():
         })
     else:
         return jsonify({}), 404
-
+    
+@app.route('/gerar-imprimir/<int:exam_id>', methods=['POST'])
+def gerar_imprimir(exam_id):
+    # Gera o documento Word e converte para PDF
+    pdf_gerado = gerar_documento(exam_id)
+    if pdf_gerado:
+        # Envia o PDF para a impressora
+        imprimir_pdf(pdf_gerado)
+        return jsonify({"status": "success", "message": "Documento gerado e enviado para impressão!"})
+    else:
+        return jsonify({"status": "error", "message": "Erro ao gerar o documento."})
 
 
 @app.route('/edit/<int:exam_id>', methods=['GET', 'POST'])
@@ -185,14 +194,33 @@ def client_record_search():
             category=category,
             subcategory=subcategory
         )
-        db.session.add(new_exam)
+        db.session.add(new_client)
         db.session.commit()
-        
-        flash('Ficha do cliente e exame salvos com sucesso!', 'success')
+
+        # Processa os exames enviados
+        exam_count = 0
+        while f'category_{exam_count}' in request.form:
+            category = request.form[f'category_{exam_count}']
+            subcategory = request.form[f'subcategory_{exam_count}']
+
+            # Salva o exame associado ao cliente
+            new_exam = Exam(
+                patient_name=patient_name,
+                category=category,
+                subcategory=subcategory,
+                result='',  # Resultado pode ser preenchido posteriormente
+                details={}   # Detalhes podem ser preenchidos posteriormente
+            )
+            db.session.add(new_exam)
+            exam_count += 1
+
+        db.session.commit()
+        flash('Ficha do cliente e exames salvos com sucesso!', 'success')
         return redirect(url_for('client_record', patient_name=patient_name))
-    
+
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
+# Rota para remover um exame
 @app.route('/delete/<int:exam_id>', methods=['POST'])
 def delete_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)  

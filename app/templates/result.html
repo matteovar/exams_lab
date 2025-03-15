@@ -14,7 +14,6 @@
                 <a href="{{ url_for('exame') }}" class="btn-option">Registrar Exame</a>
                 <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
                 <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
-
             </div>
         </div>
     </div>
@@ -62,12 +61,14 @@
                                     </ul>
                                 </div>
                             {% endif %}
-                            <!-- Botões de Editar e Remover -->
+                            <!-- Botões de Editar, Remover e Imprimir -->
                             <div class="exam-actions">
                                 <a href="{{ url_for('edit_exam', exam_id=exam.id) }}" class="btn-edit">Editar</a>
                                 <form action="{{ url_for('delete_exam', exam_id=exam.id) }}" method="POST" style="display: inline;">
                                     <button type="submit" class="btn-delete">Remover</button>
                                 </form>
+                                <!-- Botão de impressão dentro do loop -->
+                                <button onclick="imprimirExame('{{ exam.id }}')">Imprimir Exame</button>
                             </div>
                         </div>
                     {% endfor %}
@@ -87,8 +88,29 @@
     </div>
 
 
-
     <script>
+        // Função para imprimir o exame
+        function imprimirExame(examId) {
+            fetch(`/gerar-imprimir/${examId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Função para voltar à página anterior
         function goBack() {
             window.history.back();
         }
