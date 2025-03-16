@@ -175,7 +175,11 @@ def client_record_search():
         address = request.form['address']
         category = request.form['category']
         subcategory = request.form['subcategory']
-        
+        health_issues = request.form['health_issues']
+        allergies = request.form['allergies']
+        family_health_issues = request.form['family_health_issues']
+        medications = request.form['medications']
+        previous_surgeries = request.form['previous_surgeries']
         
         new_exam = User(
             patient_name=patient_name,
@@ -183,7 +187,12 @@ def client_record_search():
             phone=phone,
             address=address,
             category=category,
-            subcategory=subcategory
+            subcategory=subcategory,
+            health_issues=health_issues,
+            allergies=allergies,
+            family_health_issues=family_health_issues,
+            medications=medications,
+            previous_surgeries=previous_surgeries
         )
         db.session.add(new_exam)
         db.session.commit()
@@ -233,10 +242,6 @@ def client_record(patient_name):
         grouped_exams=grouped_exams
     )
 
-from docx import Document
-from docx2pdf import convert
-import os
-import pythoncom  # Importe o pythoncom para inicializar o CoInitialize
 
 @app.route('/generate_word/<string:patient_name>')
 def generate_word(patient_name):

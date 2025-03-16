@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha do Cliente</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/client_record.css') }}">
 </head>
 <body>
     <div class="sidebar">
@@ -35,46 +35,49 @@
     </div>
       
 
-    <div class="client-info">
-        <h3>Informações do Cliente</h3>
-        <ul>
-            <li><strong>Nome:</strong> {{ patient_name }}</li>
-            <li><strong>CPF:</strong> {{ cpf }}</li>
-            <li><strong>Telefone:</strong> {{ phone }}</li>
-            <li><strong>Endereço:</strong> {{ address }}</li>
-        </ul>
-    </div>
-    <div class="exam-info">
-        <h3>Exames Realizados</h3>
-        {% if grouped_exams %}
-            <div class="results-container">
-                {% for category, category_data in grouped_exams.items() %}
-                    <div class="exam-card">
-                        <div class="category">
-                            <strong>Categoria:</strong> {{ category }}
-                        </div>
-                        {% for exam in category_data.exams %}
-                            <div class="exam-details">
-                                <ul>
-                                    <li><strong>Subcategoria:</strong> {{ exam.subcategory }}</li>
-                                    {% if exam.details %}
-                                        {% for key, value in exam.details.items() %}
-                                            <li>
-                                                <strong>{{ key.replace('_', ' ').title() }}:</strong> 
-                                                {{ value }}
-                                            </li>
-                                        {% endfor %}
-                                    {% endif %}
-                                </ul>
+    <div class="main-content">
+        <div class="client-info">
+            <h3>Informações do Cliente</h3>
+            <ul>
+                <li><strong>Nome:</strong> {{ patient_name }}</li>
+                <li><strong>CPF:</strong> {{ cpf }}</li>
+                <li><strong>Telefone:</strong> {{ phone }}</li>
+                <li><strong>Endereço:</strong> {{ address }}</li>
+            </ul>
+        </div>
+        
+        <div class="exam-info">
+            <h3>Exames Realizados</h3>
+            {% if grouped_exams %}
+                <div class="results-container">
+                    {% for category, category_data in grouped_exams.items() %}
+                        <div class="exam-card">
+                            <div class="category">
+                                <strong>Categoria:</strong> {{ category }}
                             </div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Não há exames registrados para este paciente.</p>
-        {% endif %}
-        <button onclick="goBack()" class="btn-back">Voltar</button>
+                            {% for exam in category_data.exams %}
+                                <div class="exam-details">
+                                    <ul>
+                                        <li><strong>Subcategoria:</strong> {{ exam.subcategory }}</li>
+                                        {% if exam.details %}
+                                            {% for key, value in exam.details.items() %}
+                                                <li>
+                                                    <strong>{{ key.replace('_', ' ').title() }}:</strong> 
+                                                    {{ value }}
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Não há exames registrados para este paciente.</p>
+            {% endif %}
+            <button onclick="goBack()" class="btn-back">Voltar</button>
+        </div>
     </div>
 
     <script>

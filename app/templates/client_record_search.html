@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha do Cliente</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/mainpage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/client_record_search.css') }}">
 </head>
 <body>
     <div class="sidebar">
@@ -31,7 +31,9 @@
     </div>
 
     <div class="home-container">
-            <form action="{{ url_for('client_record_search') }}" method="POST">
+        <form action="{{ url_for('client_record_search') }}" method="POST">
+            <div class="form-grid">
+                
                 <div class="form-group">
                     <label for="patient_name">Nome do Paciente:</label>
                     <input type="text" id="patient_name" name="patient_name" required>
@@ -63,9 +65,40 @@
                         <option value="" disabled selected>Selecione a subcategoria</option>
                     </select>
                 </div>
-                <button type="submit">Salvar Ficha e Exame</button>
-            </form>
-        <button onclick="goBack()" class="btn-back">Voltar</button>
+
+                <!-- Seção de Perguntas Médicas -->
+                <div class="form-group">
+                    <label for="health_issues">Tem algum problema de saúde?</label>
+                    <input type="text" id="health_issues" name="health_issues" placeholder="Descreva problemas de saúde...">
+                </div>
+                <div class="form-group">
+                    <label for="allergies">Alergico a alguma coisa?</label>
+                    <input type="text" id="allergies" name="allergies" placeholder="Descreva alergias...">
+                </div>
+                <div class="form-group">
+                    <label for="family_health_issues">Problemas de saúde na família?</label>
+                    <input type="text" id="family_health_issues" name="family_health_issues" placeholder="Descreva problemas de saúde na família...">
+                </div>
+                <div class="form-group">
+                    <label for="medications">Está tomando algum medicamento atualmente?</label>
+                    <input type="text" id="medications" name="medications" placeholder="Descreva medicamentos...">
+                </div>
+                <div class="form-group">
+                    <label for="previous_surgeries">Já fez alguma cirurgia?</label>
+                    <input type="text" id="previous_surgeries" name="previous_surgeries" placeholder="Descreva cirurgias anteriores...">
+                </div>
+            </div>
+            <div class="button-container">
+                <div class="btn-group">
+                    <button onclick="goBack()" class="btn-back">Voltar</button>
+                    <button type="submit" id="save-button">Registrar Exame</button>
+                </div>
+            </div>
+
+            
+        </form>
+        
+
     </div>
 
     <script>
@@ -92,4 +125,4 @@
         }
     </script>
 </body>
-<html
+</html>

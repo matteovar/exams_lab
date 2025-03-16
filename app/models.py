@@ -27,6 +27,11 @@ class User(db.Model):
     address = db.Column(db.String(200), nullable=False)
     category = db.Column(db.String(100), nullable=False)
     subcategory = db.Column(db.String(100), nullable=False)
+    health_issues = db.Column(db.String(500))  # Novo campo
+    allergies = db.Column(db.String(500))      # Novo campo
+    family_health_issues = db.Column(db.String(500))  # Novo campo
+    medications = db.Column(db.String(500))    # Novo campo
+    previous_surgeries = db.Column(db.String(500))  # Novo campo
 
     def __repr__(self):
         return f"<User {self.patient_name}>"

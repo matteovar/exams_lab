@@ -113,10 +113,10 @@ body {
 }
 
 .button-container {
-    display: flex; /* Usa flexbox para alinhar os botões lado a lado */
-    gap: 10px; /* Espaçamento entre os botões */
-    margin-top: 20px; /* Margem superior para separar dos outros elementos */
-    justify-content: flex-start; /* Alinha os botões à esquerda */
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-start;
 }
 
 .fixed-header {
@@ -201,51 +201,94 @@ body {
 
 .center-container {
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
-    margin-top: 20px; /* Espaçamento superior */
-    margin-bottom: 20px; /* Espaçamento inferior */
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 
-/* Container para centralizar os botões */
+
 .button-center-container {
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
-    margin-top: 20px; /* Espaçamento superior */
-    margin-bottom: 20px; /* Espaçamento inferior */
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 
-/* Estilo para o botão "Voltar" */
+
 .btn-back {
-    background-color: #6c757d; /* Cor vermelha */
+    background-color: #6c757d;
     color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
 .btn-back:hover {
-    background-color: #6c757d; /* Cor vermelha mais escura ao passar o mouse */
+    background-color: #5a6268;
 }
 
-/* Estilo para o botão "Gerar Word/PDF" */
 .btn-generate {
-    background-color: #4CAF50; /* Cor verde */
+    background-color: #4CAF50;
     color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-decoration: none; /* Remove o sublinhado do link */
+    text-decoration: none;
     font-size: 16px;
-    display: inline-block; /* Garante que o link se comporte como um botão */
+    display: inline-block;
 }
 
 .btn-generate:hover {
-    background-color: #45a049; /* Cor verde mais escura ao passar o mouse */
+    background-color: #45a049;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Arial', sans-serif;
+    resize: vertical;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    outline: none;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
 }

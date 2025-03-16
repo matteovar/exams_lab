@@ -1,0 +1,186 @@
+html, body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+}
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: left 0.3s ease;
+}
+
+.sidebar-content {
+    padding: 20px;
+    padding-top: 70px;
+    margin-top: 27px;
+}
+
+.sidebar-box .btn-option {
+    display: block;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-box .btn-option::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s ease-out;
+}
+
+.sidebar-box .btn-option:hover {
+    background-color: #34495e;
+}
+
+.sidebar-box .btn-option:hover::after {
+    width: 100%;
+}
+
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.add-exam-button {
+    text-align: right;
+    margin-bottom: 20px;
+    margin-top: 40px;
+    margin-right: 10px;
+}
+
+.add-exam-button .btn-add-exam {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-exam-button .btn-add-exam:hover {
+    background-color: #2980b9;
+}
+
+.client-info, .exam-info {
+    margin-left: 12%;
+    margin-top: 80px; /* Ajuste para evitar sobreposição com o cabeçalho fixo */
+}
+
+.results-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: flex-start;
+}
+
+.exam-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(33.33% - 20px);
+    margin-bottom: 20px;
+    word-wrap: break-word;
+}
+
+.exam-card h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.category {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.exam-details {
+    margin-top: 15px;
+}
+
+.exam-details ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.exam-details ul li {
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    word-break: break-word;
+}
+
+.exam-details ul li strong {
+    color: #2c3e50;
+    display: inline-block;
+    width: 150px;
+}
+
+.btn-back {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: #2980b9;
+}
