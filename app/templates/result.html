@@ -30,59 +30,60 @@
     <div class="fixed-header">
         <h1>Resultados de Exames</h1>
     </div>
-
-    <div class="results-container">
-        {% for patient_name, data in grouped_exams.items() %}
-            <div class="patient-card">
-                <h2>Paciente: {{ patient_name }}</h2>
-                <div class="patient-info">
-                    <p><strong>CPF:</strong> {{ data.patient_info.cpf }}</p>
-                    <p><strong>Telefone:</strong> {{ data.patient_info.phone }}</p>
-                    <p><strong>Endereço:</strong> {{ data.patient_info.address }}</p>
-                </div>
-                <h3>Exames Realizados:</h3>
-                <div class="exams-list">
-                    {% for exam in data.exams %}
-                        <div class="exam-card">
-                            <div class="exam-line">
-                                <p><strong>Categoria:</strong> {{ data.category }}</p>
-                            </div>
-                            <div class="exam-line">
-                                <p><strong>Subcategoria:</strong> {{ exam.subcategory }}</p>
-                            </div>
-                            <div class="exam-line">
-                                <p><strong>Resultado:</strong> {{ exam.result }}</p>
-                            </div>
-                            {% if exam.details %}
-                                <div class="details-box">
-                                    <h4>Detalhes:</h4>
-                                    <ul>
-                                        {% for key, value in exam.details.items() %}
-                                            <li><strong>{{ key }}:</strong> {{ value }}</li>
-                                        {% endfor %}
-                                    </ul>
+    <div class="main-content">
+        <div class="results-container">
+            {% for patient_name, data in grouped_exams.items() %}
+                <div class="patient-card">
+                    <h2>Paciente: {{ patient_name }}</h2>
+                    <div class="patient-info">
+                        <p><strong>CPF:</strong> {{ data.patient_info.cpf }}</p>
+                        <p><strong>Telefone:</strong> {{ data.patient_info.phone }}</p>
+                        <p><strong>Endereço:</strong> {{ data.patient_info.address }}</p>
+                    </div>
+                    <h3>Exames Realizados:</h3>
+                    <div class="exams-list">
+                        {% for exam in data.exams %}
+                            <div class="exam-card">
+                                <div class="exam-line">
+                                    <p><strong>Categoria:</strong> {{ data.category }}</p>
                                 </div>
-                            {% endif %}
-                            <!-- Botões de Editar e Remover -->
-                            <div class="exam-actions">
-                                <a href="{{ url_for('edit_exam', exam_id=exam.id) }}" class="btn-edit">Editar</a>
-                                <form action="{{ url_for('delete_exam', exam_id=exam.id) }}" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn-delete">Remover</button>
-                                </form>
+                                <div class="exam-line">
+                                    <p><strong>Subcategoria:</strong> {{ exam.subcategory }}</p>
+                                </div>
+                                <div class="exam-line">
+                                    <p><strong>Resultado:</strong> {{ exam.result }}</p>
+                                </div>
+                                {% if exam.details %}
+                                    <div class="details-box">
+                                        <h4>Detalhes:</h4>
+                                        <ul>
+                                            {% for key, value in exam.details.items() %}
+                                                <li><strong>{{ key }}:</strong> {{ value }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                                <!-- Botões de Editar e Remover -->
+                                <div class="exam-actions">
+                                    <a href="{{ url_for('edit_exam', exam_id=exam.id) }}" class="btn-edit">Editar</a>
+                                    <form action="{{ url_for('delete_exam', exam_id=exam.id) }}" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn-delete">Remover</button>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                        
+                    </div>
                     
                 </div>
-                
-            </div>
-        {% endfor %}
-        <div class="button-center-container">
-            <div class="button-container">
-                <button onclick="goBack()" class="btn-back">Voltar</button>
-                {% for patient_name, data in grouped_exams.items() %}
-                    <a href="{{ url_for('generate_word', patient_name=patient_name) }}" class="btn-generate">Gerar Word/PDF</a>
-                {% endfor %}
+            {% endfor %}
+            <div class="button-center-container">
+                <div class="button-container">
+                    <button onclick="goBack()" class="btn-back">Voltar</button>
+                    {% for patient_name, data in grouped_exams.items() %}
+                        <a href="{{ url_for('generate_word', patient_name=patient_name) }}" class="btn-generate">Gerar Word/PDF</a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
