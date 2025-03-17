@@ -8,13 +8,13 @@
 </head>
 <body>
     <div class="sidebar">
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
         <div class="sidebar-content">
             <div class="sidebar-box">
                 <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
                 <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
                 <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
-                <a href="{{ url_for('exame') }}" class="btn-option">Registrar Exame</a>
+                <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
+                <a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a>
             </div>
         </div>
     </div>
@@ -30,24 +30,26 @@
         <h1>Ficha do Cliente: {{ patient_name }}</h1>
     </div>
     
-    <div class="add-exam-button">
-        <a href="{{ url_for('client_record_search', patient_name=patient_name) }}" class="btn-add-exam">Adicionar Novo Exame</a>
-    </div>
-      
+   
 
     <div class="main-content">
         <div class="client-info">
             <h3>Informações do Cliente</h3>
-            <ul>
                 <li><strong>Nome:</strong> {{ patient_name }}</li>
                 <li><strong>CPF:</strong> {{ cpf }}</li>
                 <li><strong>Telefone:</strong> {{ phone }}</li>
                 <li><strong>Endereço:</strong> {{ address }}</li>
             </ul>
         </div>
+         
         
         <div class="exam-info">
-            <h3>Exames Realizados</h3>
+            <div class="exam-info-header">
+                <h3>Exames Realizados</h3>
+                <div class="add-exam-button">
+                    <a href="{{ url_for('client_record_search', patient_name=patient_name) }}" class="btn-add-exam">Adicionar Novo Exame</a>
+                </div>
+            </div>
             {% if grouped_exams %}
                 <div class="results-container">
                     {% for category, category_data in grouped_exams.items() %}

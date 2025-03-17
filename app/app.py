@@ -198,7 +198,7 @@ def client_record_search():
         db.session.commit()
         
         flash('Ficha do cliente e exame salvos com sucesso!', 'success')
-        return redirect(url_for('client_record', patient_name=patient_name))
+        return redirect(url_for('view_patients', patient_name=patient_name))
     
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
@@ -208,6 +208,19 @@ def delete_exam(exam_id):
     db.session.delete(exam)  
     db.session.commit()  
     return redirect(url_for('results'))
+
+@app.route('/delete_patient/<int:patient_id>', methods=['POST'])
+def delete_patient(patient_id):
+    # Busca o paciente pelo ID
+    patient = User.query.get_or_404(patient_id)
+    
+    # Remove o paciente do banco de dados
+    db.session.delete(patient)
+    db.session.commit()
+    
+    # Redireciona de volta para a lista de pacientes
+    flash('Paciente removido com sucesso!', 'success')
+    return redirect(url_for('view_patients'))
 
 
 @app.route('/client_record/<string:patient_name>')
@@ -241,6 +254,12 @@ def client_record(patient_name):
         address=client_info["address"],
         grouped_exams=grouped_exams
     )
+
+@app.route('/patients')
+def view_patients():
+    # Query all patients from the database
+    patients = User.query.all()
+    return render_template('patients.html', patients=patients)
 
 
 @app.route('/generate_word/<string:patient_name>')
