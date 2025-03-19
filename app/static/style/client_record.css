@@ -100,6 +100,17 @@ body {
     margin-top: 20px;
 }
 
+.personal-info, .form-answers{
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 20px;
+
+}
+
 .info-row {
     display: flex;
     flex-wrap: wrap;
@@ -111,10 +122,11 @@ body {
     flex: 1;
     min-width: 200px;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: #c8c7c7;
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
 
 .info-item strong {
     margin-right: 10px;
