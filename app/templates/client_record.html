@@ -30,51 +30,139 @@
     <div class="fixed-header">
         <h1>Ficha do Cliente: {{ patient_name }}</h1>
     </div>
-    
-   
 
     <div class="main-content">
         <div class="client-info">
-            <h3>Informações do Cliente</h3>
-                <li><strong>Nome:</strong> {{ patient_name }}</li>
-                <li><strong>CPF:</strong> {{ cpf }}</li>
-                <li><strong>Telefone:</strong> {{ phone }}</li>
-                <li><strong>Endereço:</strong> {{ address }}</li>
-            </ul>
+            <div class="personal-info">
+                <h3>Informações do Cliente</h3>
+                <div class="info-row">
+                    <div class="info-item">
+                        <strong>Nome:</strong> {{ patient_name }}
+                    </div>
+                    <div class="info-item">
+                        <strong>CPF:</strong> {{ cpf }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Telefone:</strong> {{ phone }}
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <strong>Endereço:</strong> {{ address }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Data de Criação:</strong> {{ user.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                </div>
+            </div>
+
+            <h3>Problemas de Saúde</h3>
+            <div class="form-answers">
+                <div class="info-row">
+                    <div class="info-item">
+                        <strong>Problemas Crônicos:</strong> {{ user.registered_exams.health_issues }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Alergias:</strong> {{ user.registered_exams.allergies }}
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <strong>Problemas de Saúde na Família:</strong> {{ user.registered_exams.family_health_issues }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Medicamentos:</strong> {{ user.registered_exams.medications }}
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <strong>Cirurgias Anteriores:</strong> {{ user.registered_exams.previous_surgeries }}
+                    </div>
+                </div>
+            </div>
+
+            <h4>Exames Registrados</h4>
+            {% if user.registered_exams %}
+                <div class="info-row">
+                    <div class="info-item">
+                        <strong>Categoria:</strong> {{ user.registered_exams.category }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Subcategoria:</strong> {{ user.registered_exams.subcategory }}
+                    </div>
+                </div>
+            {% else %}
+                <p>Não há exames registrados para este paciente.</p>
+            {% endif %}
         </div>
-         
-        
+
         <div class="exam-info">
             <div class="exam-info-header">
                 <h3>Exames Realizados</h3>
                 <div class="add-exam-button">
-                    <a href="{{ url_for('client_record_search', patient_name=patient_name) }}" class="btn-add-exam">Adicionar Novo Exame</a>
+                    <a href="{{ url_for('exame', patient_name=patient_name) }}" class="btn-add-exam">Adicionar Novo Exame</a>
                 </div>
             </div>
             {% if grouped_exams %}
                 <div class="results-container">
-                    {% for category, category_data in grouped_exams.items() %}
-                        <div class="exam-card">
-                            <div class="category">
-                                <strong>Categoria:</strong> {{ category }}
-                            </div>
-                            {% for exam in category_data.exams %}
-                                <div class="exam-details">
-                                    <ul>
-                                        <li><strong>Subcategoria:</strong> {{ exam.subcategory }}</li>
-                                        {% if exam.details %}
-                                            {% for key, value in exam.details.items() %}
-                                                <li>
-                                                    <strong>{{ key.replace('_', ' ').title() }}:</strong> 
-                                                    {{ value }}
-                                                </li>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </ul>
-                                </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category, category_data in grouped_exams.items() %}
+                                <tr>
+                                    <td>
+                                        <div class="category" onclick="toggleExams('{{ category }}')">
+                                            {{ category }}
+                                            <span class="toggle-icon">▼</span>
+                                        </div>
+                                        <div class="exam-list" id="exams-{{ category }}" style="display: none;">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Subcategoria</th>
+                                                        <th>Detalhes</th>
+                                                        <th>Ações</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for exam in category_data.exams %}
+                                                        <tr>
+                                                            <td>{{ exam.subcategory }}</td>
+                                                            <td>
+                                                                {% if exam.details %}
+                                                                    <ul>
+                                                                        {% for key, value in exam.details.items() %}
+                                                                            <li>
+                                                                                <strong>{{ key.replace('_', ' ').title() }}:</strong> 
+                                                                                {{ value }}
+                                                                            </li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                {% else %}
+                                                                    Nenhum detalhe adicional.
+                                                                {% endif %}
+                                                            </td>
+                                                            <td>
+                                                                <a href="{{ url_for('results', exam_id=exam.id) }}" class="btn-view-result">Ver Resultado</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn-access-record">Acessar Exames</a>
+                                    </td>
+                                </tr>
                             {% endfor %}
-                        </div>
-                    {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             {% else %}
                 <p>Não há exames registrados para este paciente.</p>
@@ -86,6 +174,18 @@
     <script>
         function goBack() {
             window.history.back();
+        }
+
+        function toggleExams(category) {
+            const examList = document.getElementById(`exams-${category}`);
+            const toggleIcon = examList.previousElementSibling.querySelector('.toggle-icon');
+            if (examList.style.display === 'none') {
+                examList.style.display = 'block';
+                toggleIcon.textContent = '▲';
+            } else {
+                examList.style.display = 'none';
+                toggleIcon.textContent = '▼';
+            }
         }
     </script>
 </body>

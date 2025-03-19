@@ -19,6 +19,8 @@ class SubCategory(db.Model):
     def __repr__(self):
         return f"<SubCategory {self.name}>"
 
+from datetime import datetime
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_name = db.Column(db.String(100), nullable=False)
@@ -32,6 +34,8 @@ class User(db.Model):
     family_health_issues = db.Column(db.String(500))  # Novo campo
     medications = db.Column(db.String(500))    # Novo campo
     previous_surgeries = db.Column(db.String(500))  # Novo campo
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    registered_exams = db.Column(JSON) # Novo campo para data de criação
 
     def __repr__(self):
         return f"<User {self.patient_name}>"

@@ -55,13 +55,15 @@ def generate_label():
 @app.route('/get_patient_details')
 def get_patient_details():
     patient_name = request.args.get('patient_name')
-    patient = Exam.query.filter_by(patient_name=patient_name).first()
+    patient = User.query.filter_by(patient_name=patient_name).first()
 
     if patient:
         return jsonify({
             'cpf': patient.cpf,
             'phone': patient.phone,
-            'address': patient.address
+            'address': patient.address,
+            'category': patient.category,  # Adicionando a categoria
+            'subcategory': patient.subcategory  # Adicionando a subcategoria
         })
     else:
         return jsonify({}), 404
@@ -96,40 +98,27 @@ def edit_exam(exam_id):
     return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
 
-
-
-
 @app.route('/submit', methods=['POST'])
 def submit_exam():
-    
     patient_name = request.form['patient_name']
     category = request.form['category']
     subcategory = request.form['subcategory']
-    result = request.form.get('result', '')  
+    result = request.form.get('result', '')
 
-    
+    # Verifica se o paciente já existe
     user = User.query.filter_by(patient_name=patient_name).first()
 
     if not user:
         flash('Paciente não encontrado. Por favor, cadastre o paciente primeiro.', 'error')
         return redirect(url_for('exame'))
 
-    
-    details = {}
-    for key, value in request.form.items():
-        if key.startswith('detail_key_') and value:  
-            detail_number = key.split('_')[-1]  
-            detail_value = request.form.get(f'detail_value_{detail_number}', '')  
-            if detail_value:  
-                details[value] = detail_value
-
-    
+    # Cria o novo exame
     new_exam = Exam(
-        patient_name=patient_name,  
+        patient_name=patient_name,
         category=category,
         subcategory=subcategory,
-        result=result,  
-        details=details  
+        result=result,
+        details={}  # Você pode adicionar detalhes aqui, se necessário
     )
 
     db.session.add(new_exam)
@@ -180,26 +169,64 @@ def client_record_search():
         family_health_issues = request.form['family_health_issues']
         medications = request.form['medications']
         previous_surgeries = request.form['previous_surgeries']
-        
-        new_exam = User(
-            patient_name=patient_name,
-            cpf=cpf,
-            phone=phone,
-            address=address,
-            category=category,
-            subcategory=subcategory,
-            health_issues=health_issues,
-            allergies=allergies,
-            family_health_issues=family_health_issues,
-            medications=medications,
-            previous_surgeries=previous_surgeries
-        )
-        db.session.add(new_exam)
-        db.session.commit()
-        
-        flash('Ficha do cliente e exame salvos com sucesso!', 'success')
+
+        # Verifica se o paciente já existe com base no nome e CPF
+        existing_patient = User.query.filter_by(patient_name=patient_name, cpf=cpf).first()
+
+        if existing_patient:
+            existing_patient.phone = phone
+            existing_patient.address = address
+            existing_patient.category = category
+            existing_patient.subcategory = subcategory
+            existing_patient.health_issues = health_issues
+            existing_patient.allergies = allergies
+            existing_patient.family_health_issues = family_health_issues
+            existing_patient.medications = medications
+            existing_patient.previous_surgeries = previous_surgeries
+
+            # Atualiza os exames registrados
+            registered_exams = {
+                'category': category,
+                'subcategory': subcategory,
+                'health_issues': health_issues,
+                'allergies': allergies,
+                'family_health_issues': family_health_issues,
+                'medications': medications,
+                'previous_surgeries': previous_surgeries
+            }
+            existing_patient.registered_exams = registered_exams
+
+            db.session.commit()
+            flash('Paciente atualizado com sucesso!', 'success')
+        else:
+            new_patient = User(
+                patient_name=patient_name,
+                cpf=cpf,
+                phone=phone,
+                address=address,
+                category=category,
+                subcategory=subcategory,
+                health_issues=health_issues,
+                allergies=allergies,
+                family_health_issues=family_health_issues,
+                medications=medications,
+                previous_surgeries=previous_surgeries,
+                registered_exams={
+                    'category': category,
+                    'subcategory': subcategory,
+                    'health_issues': health_issues,
+                    'allergies': allergies,
+                    'family_health_issues': family_health_issues,
+                    'medications': medications,
+                    'previous_surgeries': previous_surgeries
+                }
+            )
+            db.session.add(new_patient)
+            db.session.commit()
+            flash('Ficha do cliente e exame salvos com sucesso!', 'success')
+
         return redirect(url_for('view_patients', patient_name=patient_name))
-    
+
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
 @app.route('/delete/<int:exam_id>', methods=['POST'])
@@ -225,19 +252,14 @@ def delete_patient(patient_id):
 
 @app.route('/client_record/<string:patient_name>')
 def client_record(patient_name):
-    exams = User.query.filter_by(patient_name=patient_name).all()
+    user = User.query.filter_by(patient_name=patient_name).first()
     
-    if not exams:
+    if not user:
         flash(f'Nenhum exame encontrado para o paciente: {patient_name}', 'warning')
         return redirect(url_for('client_record_search'))
     
-    
-    client_info = {
-        "cpf": exams[0].cpf,
-        "phone": exams[0].phone,
-        "address": exams[0].address
-    }
-    
+    exams = Exam.query.filter_by(patient_name=patient_name).all()
+
     
     grouped_exams = defaultdict(lambda: {"exams": []})
     for exam in exams:
@@ -249,9 +271,10 @@ def client_record(patient_name):
     return render_template(
         'client_record.html',
         patient_name=patient_name,
-        cpf=client_info["cpf"],
-        phone=client_info["phone"],
-        address=client_info["address"],
+        cpf=user.cpf,
+        phone=user.phone,
+        address=user.address,
+        user=user,  # Passando o objeto user para o template
         grouped_exams=grouped_exams
     )
 
