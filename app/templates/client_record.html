@@ -13,7 +13,6 @@
                 <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
                 <a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a>
                 <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
-                <a href="{{ url_for('results') }}" class="btn-option">Ver Resultados</a>
                 <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
                 <a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a>
             </div>
@@ -109,57 +108,21 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Categoria</th>
-                                <th>Ações</th>
+                                <th>Categoria</th> 
+                                <th>Data</th>  
+                                <th></th>                      
                             </tr>
                         </thead>
                         <tbody>
                             {% for category, category_data in grouped_exams.items() %}
                                 <tr>
-                                    <td>
-                                        <div class="category" onclick="toggleExams('{{ category }}')">
-                                            {{ category }}
-                                            <span class="toggle-icon">▼</span>
-                                        </div>
-                                        <div class="exam-list" id="exams-{{ category }}" style="display: none;">
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Subcategoria</th>
-                                                        <th>Detalhes</th>
-                                                        <th>Ações</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for exam in category_data.exams %}
-                                                        <tr>
-                                                            <td>{{ exam.subcategory }}</td>
-                                                            <td>
-                                                                {% if exam.details %}
-                                                                    <ul>
-                                                                        {% for key, value in exam.details.items() %}
-                                                                            <li>
-                                                                                <strong>{{ key.replace('_', ' ').title() }}:</strong> 
-                                                                                {{ value }}
-                                                                            </li>
-                                                                        {% endfor %}
-                                                                    </ul>
-                                                                {% else %}
-                                                                    Nenhum detalhe adicional.
-                                                                {% endif %}
-                                                            </td>
-                                                            <td>
-                                                                <a href="{{ url_for('results', exam_id=exam.id) }}" class="btn-view-result">Ver Resultado</a>
-                                                            </td>
-                                                        </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <a href="#" class="btn-access-record">Acessar Exames</a>
-                                    </td>
+                                    <td>{{category}}</td>
+                                    {% for exam in category_data.exams %}
+                                        <td>Realizado em: {{ exam.created_at }}</td>
+                                        <td>
+                                            <a href="{{ url_for('view_exam', exam_id=exam.id) }}" class="btn-view-result">Ver Resultados</a>
+                                        </td>
+                                    {% endfor %}
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -175,18 +138,6 @@
     <script>
         function goBack() {
             window.history.back();
-        }
-
-        function toggleExams(category) {
-            const examList = document.getElementById(`exams-${category}`);
-            const toggleIcon = examList.previousElementSibling.querySelector('.toggle-icon');
-            if (examList.style.display === 'none') {
-                examList.style.display = 'block';
-                toggleIcon.textContent = '▲';
-            } else {
-                examList.style.display = 'none';
-                toggleIcon.textContent = '▼';
-            }
         }
     </script>
 </body>

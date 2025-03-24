@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, send_file, url_for, flash, jsonify
 from models import db, Exam, User
 from collections import defaultdict
@@ -42,6 +43,11 @@ def home():
 def exame():
     return render_template('exame.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
 
+
+@app.route('/exam/<int:exam_id>')
+def view_exam(exam_id):
+    exam = Exam.query.get_or_404(exam_id)  # Busca o exame pelo ID
+    return render_template('exam_detail.html', exam=exam)
 
 @app.route('/generate_label', methods=['GET', 'POST'])
 def generate_label():
@@ -92,11 +98,10 @@ def edit_exam(exam_id):
         exam.details = details
 
         db.session.commit()  
-        return redirect(url_for('results'))
+        return redirect(url_for('view_patients'))
 
     
     return render_template('edit_exam.html', exam=exam, exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
-
 
 @app.route('/submit', methods=['POST'])
 def submit_exam():
@@ -118,42 +123,13 @@ def submit_exam():
         category=category,
         subcategory=subcategory,
         result=result,
-        details={}  # Você pode adicionar detalhes aqui, se necessário
+        details={},  # Você pode adicionar detalhes aqui, se necessário
+        created_at=datetime.utcnow()  # Definindo manualmente a data e a hora
     )
 
     db.session.add(new_exam)
     db.session.commit()
-    return redirect(url_for('results'))
-
-
-@app.route('/results')
-def results():
-    exams = Exam.query.all()
-    grouped_exams = defaultdict(lambda: {"category": None, "exams": [], "patient_info": {}})
-    
-    for exam in exams:
-        
-        user = User.query.filter_by(patient_name=exam.patient_name).first()
-        
-        if user:
-            grouped_exams[exam.patient_name]["patient_info"] = {
-                "cpf": user.cpf,
-                "phone": user.phone,
-                "address": user.address
-            }
-        
-        if not grouped_exams[exam.patient_name]["category"]:
-            grouped_exams[exam.patient_name]["category"] = exam.category
-        
-        grouped_exams[exam.patient_name]["exams"].append({
-            "id": exam.id,
-            "subcategory": exam.subcategory,
-            "result": exam.result,
-            "details": exam.details
-        })
-    
-    return render_template('result.html', grouped_exams=grouped_exams)
-
+    return redirect(url_for('client_record', patient_name=patient_name))
 
 @app.route('/client_record_search', methods=['GET', 'POST'])
 def client_record_search():
@@ -260,12 +236,13 @@ def client_record(patient_name):
     
     exams = Exam.query.filter_by(patient_name=patient_name).all()
 
-    
     grouped_exams = defaultdict(lambda: {"exams": []})
     for exam in exams:
         grouped_exams[exam.category]["exams"].append({
             "id": exam.id,
             "subcategory": exam.subcategory,
+            "details": exam.details,  # Adicionando os detalhes
+            "created_at": exam.created_at.strftime('%d/%m/%Y %H:%M')  # Adicionando o campo created_at
         })
     
     return render_template(
@@ -274,7 +251,7 @@ def client_record(patient_name):
         cpf=user.cpf,
         phone=user.phone,
         address=user.address,
-        user=user,  # Passando o objeto user para o template
+        user=user,
         grouped_exams=grouped_exams
     )
 
@@ -293,7 +270,7 @@ def generate_word(patient_name):
 
     if not user or not exams:
         flash('Paciente ou exames não encontrados.', 'error')
-        return redirect(url_for('results'))
+        return redirect(url_for('view_patients'))  # Redireciona para a lista de pacientes
 
     # Criar um documento Word
     doc = Document()

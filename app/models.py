@@ -40,13 +40,16 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.patient_name}>"
 
+from datetime import datetime  # Certifique-se de que esta importação está no topo do arquivo
+
 class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    patient_name= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  
+    patient_name = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(100), nullable=False)
     subcategory = db.Column(db.String(100), nullable=False)
     result = db.Column(db.String(100), nullable=False)
-    details = db.Column(JSON)  
+    details = db.Column(JSON)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Novo campo
 
     def __repr__(self):
         return f"<Exam {self.category} - {self.subcategory}>"
