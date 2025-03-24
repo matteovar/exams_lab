@@ -118,19 +118,19 @@ body {
 
 
 .btn-registrar-exame {
-    background-image: url("/static/assets/frasco.png");
+    background-image: url("/static/image/frasco.png");
 }
 
 .btn-gerar-etiqueta {
-    background-image: url("/static/assets/etiqueta.png");
+    background-image: url("/static/image/etiqueta.png");
 }
 
 .btn-ver-resultados {
-    background-image: url("/static/assets/result.png");
+    background-image: url("/static/image/result.png");
 }
 
 .btn-ficha-cliente {
-    background-image: url("/static/assets/cadastro.png");
+    background-image: url("/static/image/cadastro.png");
 }
 
 .sidebar .btn-option {

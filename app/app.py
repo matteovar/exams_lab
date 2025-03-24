@@ -3,10 +3,7 @@ from flask import Flask, render_template, request, redirect, send_file, url_for,
 from models import db, Exam, User
 from collections import defaultdict
 import json
-from docx import Document
-from docx2pdf import convert
 import os
-import pythoncom 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exams.db'

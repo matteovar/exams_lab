@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha do Cliente</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/client_record.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/client_record.css') }}">
 </head>
 <body>
     <div class="sidebar">
@@ -109,6 +109,7 @@
                         <thead>
                             <tr>
                                 <th>Categoria</th> 
+                                <th>Subcategoria</th>
                                 <th>Data</th>  
                                 <th></th>                      
                             </tr>
@@ -118,11 +119,14 @@
                                 <tr>
                                     <td>{{category}}</td>
                                     {% for exam in category_data.exams %}
+                                        <td>{{exam.subcategory}}</td>
                                         <td>Realizado em: {{ exam.created_at }}</td>
                                         <td>
                                             <a href="{{ url_for('view_exam', exam_id=exam.id) }}" class="btn-view-result">Ver Resultados</a>
                                         </td>
+                                        
                                     {% endfor %}
+                                      
                                 </tr>
                             {% endfor %}
                         </tbody>
