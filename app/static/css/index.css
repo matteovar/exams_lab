@@ -23,10 +23,10 @@ body {
 }
 
 .logo-img {
-    width: 120px; /* Ajuste o tamanho da imagem conforme necessário */
+    width: 140px; /* Ajuste o tamanho da imagem conforme necessário */
     height: auto;
     margin-right: 10px;
-    margin-top: 15px; /* Espaçamento entre a imagem e o texto */
+    margin-top: 20px; /* Espaçamento entre a imagem e o texto */
 }
 
 nav{
@@ -34,14 +34,15 @@ nav{
     justify-content: space-around;
     align-items: center;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: #aca7a7 ;
+    background: #266e80 ;
     height: 11vh;
 }
 
 nav a{
-    color : #000;
+    color : #ffffff;
     text-decoration: none;
     transition: 0.3s;
+    font-size: 20px;
 }
 
 nav a:hover{

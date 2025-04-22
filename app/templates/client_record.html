@@ -7,22 +7,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/client_record.css') }}">
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-content">
-            <div class="sidebar-box">
-                <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
-                <a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a>
-                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
-                <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
-                <a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="fixed-header">
-        <h1>Ficha do Cliente: {{ patient_name }}</h1>
-    </div>
+    <header>
+        <nav>
+            <a class="logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="logo-img"> <!-- Aqui você coloca a imagem -->
+                Lab Access
+            </a>
+            <ul class="nav-list">
+                <li><a href="{{ url_for('home') }}" class="btn-option ">Dashboard</a></li>
+                <li><a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a></li>
+                <li><a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a></li>
+                <li><a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a></li>
+                <li><a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <div class="main-content">
         <div class="client-info">
@@ -74,20 +73,21 @@
                     </div>
                 </div>
             </div>
-
-            <h4>Exames Registrados</h4>
-            {% if user.registered_exams %}
-                <div class="info-row">
-                    <div class="info-item">
-                        <strong>Categoria:</strong> {{ user.registered_exams.category }}
+            <div class="exam-register">
+                <h3>Exames Registrados</h3>
+                {% if user.registered_exams %}
+                    <div class="info-row">
+                        <div class="info-item">
+                            <strong>Categoria:</strong> {{ user.registered_exams.category }}
+                        </div>
+                        <div class="info-item">
+                            <strong>Subcategoria:</strong> {{ user.registered_exams.subcategory }}
+                        </div>
                     </div>
-                    <div class="info-item">
-                        <strong>Subcategoria:</strong> {{ user.registered_exams.subcategory }}
-                    </div>
-                </div>
-            {% else %}
-                <p>Não há exames registrados para este paciente.</p>
-            {% endif %}
+                {% else %}
+                    <p>Não há exames registrados para este paciente.</p>
+                {% endif %}
+            </div>
         </div>
 
         <div class="exam-info">
@@ -110,25 +110,38 @@
                         </thead>
                         <tbody>
                             {% for category, category_data in grouped_exams.items() %}
-                                <tr>
-                                    <td>{{category}}</td>
-                                    {% for exam in category_data.exams %}
-                                        <td>{{exam.subcategory}}</td>
+                                {% for exam in category_data.exams %}
+                                    <tr>
+                                        <td>{{ category }}</td>
+                                        <td>{{ exam.subcategory }}</td>
                                         <td>Realizado em: {{ exam.created_at }}</td>
                                         <td>
                                             <a href="{{ url_for('view_exam', exam_id=exam.id) }}" class="btn-view-result">Ver Resultados</a>
                                         </td>
-                                        
-                                    {% endfor %}
-                                      
-                                </tr>
+                                    </tr>
+                                {% endfor %}
                             {% endfor %}
                         </tbody>
+                        
                     </table>
                 </div>
             {% else %}
                 <p>Não há exames registrados para este paciente.</p>
             {% endif %}
+        </div>
+            <div class="document-info">
+                <h3>Documentos Anexados</h3>
+                {% if user.document %}
+                    <div class="info-item">
+                        <strong>Documento Anexado:</strong>
+                        <a href="{{ url_for('static', filename='uploads/' + user.document) }}" target="_blank">Visualizar Arquivo</a>
+                    </div>
+                {% else %}
+                    <p>Nenhum documento anexado.</p>
+                {% endif %}
+            </div>
+        </div>
+            
             <button onclick="goBack()" class="btn-back">Voltar</button>
         </div>
     </div>

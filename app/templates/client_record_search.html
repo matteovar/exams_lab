@@ -24,7 +24,7 @@
     </header>
 
     <div class="main-content">
-        <form action="{{ url_for('client_record_search') }}" method="POST">
+        <form action="{{ url_for('client_record_search') }}" method="POST" enctype="multipart/form-data">
             <div class="form-grid">
                 
                 <div class="form-group">
@@ -79,6 +79,10 @@
                 <div class="form-group">
                     <label for="previous_surgeries">Já fez alguma cirurgia?</label>
                     <input type="text" id="previous_surgeries" name="previous_surgeries" placeholder="Descreva cirurgias anteriores...">
+                </div>
+                <div class="form-group">
+                    <label for="documento">Anexar Documento Médico (PDF ou Imagem):</label>
+                    <input type="file" name="documento" id="documento" accept=".pdf,.png,.jpg,.jpeg">
                 </div>
             </div>
             <div class="button-container">

@@ -36,6 +36,8 @@ class User(db.Model):
     previous_surgeries = db.Column(db.String(500))  # Novo campo
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     registered_exams = db.Column(JSON) # Novo campo para data de criação
+    document = db.Column(db.String(255))  # caminho do arquivo
+
 
     def __repr__(self):
         return f"<User {self.patient_name}>"

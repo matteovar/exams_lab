@@ -7,30 +7,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-content">
-            <div class="sidebar-box">
-                <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
-                <a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a>
-                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
-                <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
-                <a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="fixed-header">
-        <h1>Lista de Pacientes</h1>
-    </div>
+    <header>
+        <nav>
+            <a class="logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="logo-img"> <!-- Aqui você coloca a imagem -->
+                Lab Access
+            </a>
+            <ul class="nav-list">
+                <li><a href="{{ url_for('home') }}" class="btn-option ">Dashboard</a></li>
+                <li><a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a></li>
+                <li><a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a></li>
+                <li><a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a></li>
+                <li><a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <div class="main-content">
+        
         <div class="patients-container">
             <table>
                 <thead>
                     <tr>
                         <th>Nome</th>
                         <th>CPF</th>
-                        <th>Ações</th>
+                        <th>Acessar</th>
+                        <th>Remover</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,6 +42,8 @@
                             <td>{{ patient.cpf }}</td>
                             <td>
                                 <a href="{{ url_for('client_record', patient_name=patient.patient_name) }}" class="btn-access-record">Acessar Ficha</a>
+                            </td>
+                            <td>
                                 <form action="{{ url_for('delete_patient', patient_id=patient.id) }}" method="POST" style="display: inline;">
                                     <button type="submit" class="btn-remove">Remover</button>
                                 </form>

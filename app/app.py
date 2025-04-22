@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, send_file, url_for, flash, jsonify
 from models import db, Exam, User
 from collections import defaultdict
+from werkzeug.utils import secure_filename
 import json
 import os
 
@@ -128,6 +129,15 @@ def submit_exam():
     db.session.commit()
     return redirect(url_for('client_record', patient_name=patient_name))
 
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/client_record_search', methods=['GET', 'POST'])
 def client_record_search():
     if request.method == 'POST':
@@ -143,10 +153,20 @@ def client_record_search():
         medications = request.form['medications']
         previous_surgeries = request.form['previous_surgeries']
 
-        # Verifica se o paciente já existe com base no nome e CPF
+        # Processa o arquivo enviado
+        file = request.files.get('documento')
+        filename = None
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        # Verifica se o paciente já existe
         existing_patient = User.query.filter_by(patient_name=patient_name, cpf=cpf).first()
 
         if existing_patient:
+            # Atualiza os dados do paciente existente
             existing_patient.phone = phone
             existing_patient.address = address
             existing_patient.category = category
@@ -156,9 +176,10 @@ def client_record_search():
             existing_patient.family_health_issues = family_health_issues
             existing_patient.medications = medications
             existing_patient.previous_surgeries = previous_surgeries
+            if filename:
+                existing_patient.document = filename
 
-            # Atualiza os exames registrados
-            registered_exams = {
+            existing_patient.registered_exams = {
                 'category': category,
                 'subcategory': subcategory,
                 'health_issues': health_issues,
@@ -167,11 +188,11 @@ def client_record_search():
                 'medications': medications,
                 'previous_surgeries': previous_surgeries
             }
-            existing_patient.registered_exams = registered_exams
 
             db.session.commit()
             flash('Paciente atualizado com sucesso!', 'success')
         else:
+            # Novo paciente
             new_patient = User(
                 patient_name=patient_name,
                 cpf=cpf,
@@ -192,7 +213,8 @@ def client_record_search():
                     'family_health_issues': family_health_issues,
                     'medications': medications,
                     'previous_surgeries': previous_surgeries
-                }
+                },
+                document=filename if filename else None
             )
             db.session.add(new_patient)
             db.session.commit()
@@ -201,6 +223,7 @@ def client_record_search():
         return redirect(url_for('view_patients', patient_name=patient_name))
 
     return render_template('client_record_search.html', exam_types=EXAM_TYPES, exam_subcategories=EXAM_SUBCATEGORIES)
+
 
 @app.route('/delete/<int:exam_id>', methods=['POST'])
 def delete_exam(exam_id):

@@ -3,73 +3,60 @@
     padding: 0;
 }
 
-.sidebar {
-    width: 250px;
-    height: 100vh;
-    background-color: #2c3e50;
-    color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    overflow-y: auto;
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
     overflow-x: hidden;
-    transition: left 0.3s ease;
-}
-
-.sidebar-content {
-    padding: 20px;
-    padding-top: 70px;
-    margin-top: 50px;
-}
-
-.sidebar a {
-    display: block;
-    background-color: #2c3e50;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    text-align: center;
-    margin-bottom: 10px;
-    text-decoration: none;
-    font-size: 16px;
-    position: relative;
-    overflow: hidden;
-}
-
-
-.sidebar a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    height: 2px;
-    background-color: white;
-    transition: width 0.3s ease-out;
-}
-
-.sidebar a:hover {
-    background-color: #34495e;
-}
-
-.sidebar a:hover::after {
+    height: 100%;
     width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.sidebar .btn-option {
-   
-    background-color: #2c3e50;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 5px;
-    text-align: center;
+.logo {
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    display: flex;
+    align-items: center; /* Alinha a imagem e o texto verticalmente */
+}
+
+.logo-img {
+    width: 140px; /* Ajuste o tamanho da imagem conforme necessário */
+    height: auto;
+    margin-right: 10px;
+    margin-top: 20px; /* Espaçamento entre a imagem e o texto */
+}
+
+nav{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background: #266e80 ;
+    height: 11vh;
+}
+
+nav a{
+    color : #ffffff;
     text-decoration: none;
-    display: block;
+    transition: 0.3s;
+    font-size: 20px;
+}
+
+nav a:hover{
+    opacity: 0.7;
+}
+
+.nav-list{
+    list-style: none;
+    display: flex;
+}
+
+.nav-list li{
+    letter-spacing: 3px;
+    margin-left: 32px;
 }
 
 .fixed-header {
@@ -79,16 +66,14 @@
     width: 100%;
     background-color: #3498db;
     color: white;
-    padding: 15px 0;
+    padding: 30px 0;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
 }
 
 .main-content {
-    margin-left: 250px;
-    padding-top: 80px;
-    height: calc(100vh - 80px);
+    margin-left: 20%;
+    margin-right: 20%;
     overflow-y: auto;
 }
 
@@ -100,19 +85,31 @@
     margin-bottom: 20px;
 }
 
-.client-info h4 {
-    margin-top: 20px;
+.client-info h3 {
+    margin-bottom: 20px;
 }
 
-.personal-info, .form-answers{
+
+.document-info {
     flex: 1;
     min-width: 200px;
     padding: 10px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 4px;
+    margin-left: 20px;
+    margin-right: 20px;
     margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
+.personal-info, .form-answers{
+    flex: 1;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 20px;
 }
 
 .info-row {
@@ -124,7 +121,6 @@
 
 .info-item {
     flex: 1;
-    min-width: 200px;
     padding: 10px;
     background-color: #c8c7c7;
     border: 1px solid #ddd;
@@ -136,8 +132,23 @@
     margin-right: 10px;
 }
 
+.exam-register{
+    flex: 1;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
 .exam-info {
     padding: 20px;
+    flex: 1;
+    margin-left : 20px;
+    margin-right: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .exam-info-header {
@@ -176,10 +187,12 @@
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    
 }
 
 .results-container table {
-    width: 185%;
+    width: 100%;
     border-collapse: collapse;
 }
 
