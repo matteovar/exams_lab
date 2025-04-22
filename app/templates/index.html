@@ -7,28 +7,28 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-content">
-            <div class="sidebar-box">
-                <a href="{{ url_for('home') }}" class="btn-option">Dashboard</a>
-                <a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a>
-                <a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a>
-                <a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a>
-                <a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a>
-            </div>
-        </div>
+
+    <header>
+        <nav>
+            <a class="logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo" class="logo-img"> <!-- Aqui você coloca a imagem -->
+                Lab Access
+            </a>
+            <ul class="nav-list">
+                <li><a href="{{ url_for('home') }}" class="btn-option ">Dashboard</a></li>
+                <li><a href="{{ url_for('exame') }}" class="btn-option">Novo Exame</a></li>
+                <li><a href="{{ url_for('generate_label') }}" class="btn-option">Gerar Etiqueta</a></li>
+                <li><a href="{{ url_for('client_record_search') }}" class="btn-option">Abrir Ficha</a></li>
+                <li><a href="{{ url_for('view_patients') }}" class="btn-option">Pacientes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="button-container">
+        <a href="{{ url_for('exame') }}" class="main-menu-btn btn-registrar-exame">Registrar Exame</a>
+        <a href="{{ url_for('generate_label') }}" class="main-menu-btn btn-gerar-etiqueta">Gerar Etiqueta</a>
+        <a href="{{ url_for('client_record_search') }}" class="main-menu-btn btn-ficha-cliente">Ficha do Cliente</a>
     </div>
 
-    <div class="main-content">
-        <div class="fixed-header">
-            <h1>Bem-vindo!</h1>
-        </div>
-
-        <div class="button-container">
-            <a href="{{ url_for('exame') }}" class="main-menu-btn btn-registrar-exame">Registrar Exame</a>
-            <a href="{{ url_for('generate_label') }}" class="main-menu-btn btn-gerar-etiqueta">Gerar Etiqueta</a>
-            <a href="{{ url_for('client_record_search') }}" class="main-menu-btn btn-ficha-cliente">Ficha do Cliente</a>
-        </div>
-    </div>
 </body>
 </html>
