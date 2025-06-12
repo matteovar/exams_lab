@@ -8,6 +8,7 @@ import Reagendar from "./components/Reagendar";
 import Cancelar from "./components/Cancelar";
 import Login from "./components/Login";
 import DashboardMedico from "./components/DashboardMedico";
+import Ficha from "./components/Ficha";
 
 // Componente wrapper para acessar location dentro do Router
 const AppWrapper = () => {
@@ -15,7 +16,7 @@ const AppWrapper = () => {
   const [showHeader, setShowHeader] = useState(true);
 
   useEffect(() => {
-    const rotasSemHeader = ["/dashboard-medico", "/dashboard-usuario"];
+    const rotasSemHeader = ["/dashboard-medico", "/dashboard-usuario","/ficha"];
     setShowHeader(!rotasSemHeader.includes(location.pathname));
   }, [location]);
 
@@ -29,6 +30,7 @@ const AppWrapper = () => {
         <Route path="/cancelar" element={<Cancelar />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard-medico" element={<DashboardMedico />} />
+        <Route path="/ficha" element={<Ficha />} />
       </Routes>
     </>
   );
