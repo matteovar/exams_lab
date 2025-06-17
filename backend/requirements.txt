@@ -1,0 +1,9 @@
+flask
+flask-cors
+python-dotenv
+pyjwt
+flask-sqlalchemy
+flask-migrate     
+pymongo
+flask-pymongo
+werkzeug
