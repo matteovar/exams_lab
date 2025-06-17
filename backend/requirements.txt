@@ -1,9 +1,6 @@
-flask
-flask-cors
-python-dotenv
-pyjwt
-flask-sqlalchemy
-flask-migrate     
-pymongo
-flask-pymongo
-werkzeug
+Flask>=2.1.0,<3.0.0
+python-dotenv>=0.21.0
+flask-bcrypt>=1.0.1
+flask-cors>=3.0.10
+flask-jwt-extended>=4.4.4
+pymongo>=4.3.3

@@ -3,8 +3,6 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, FileEdit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-
 const Agenda = () => {
   const [agenda, setAgenda] = useState([]);
   const [expanded, setExpanded] = useState(null);
@@ -13,13 +11,32 @@ const Agenda = () => {
 
   useEffect(() => {
     fetchAgenda();
+    // eslint-disable-next-line
   }, [data]);
 
   const fetchAgenda = async () => {
     try {
+      const token = localStorage.getItem("token"); // Certifique-se que o token está salvo como "token"
+      if (!token) {
+        console.error("Token não encontrado. Faça login novamente.");
+        return;
+      }
+
       const response = await fetch(
-        `http://localhost:5000/api/medico/agenda?data=${data}`
+        `http://localhost:5000/api/medico/agenda?data=${data}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Erro na resposta:", errorData);
+        return;
+      }
+
       const dataResponse = await response.json();
       setAgenda(dataResponse);
     } catch (error) {
@@ -102,28 +119,32 @@ const Agenda = () => {
                             Exames para realizar:
                           </h3>
                           <ul className="list-disc list-inside space-y-2">
-                            {item.exames.map((exame, index) => (
-                              <li
-                                key={index}
-                                className="flex items-center justify-between"
-                              >
-                                <span>
-                                  <strong>{exame.nome}</strong>
-                                  {exame.resultado
-                                    ? ` — Resultado: ${exame.resultado}`
-                                    : ""}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    abrirFicha(item.id, item.paciente, exame)
-                                  }
-                                  className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            {item.exames && item.exames.length > 0 ? (
+                              item.exames.map((exame, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-center justify-between"
                                 >
-                                  <FileEdit className="w-4 h-4" />
-                                  Abrir Ficha
-                                </button>
-                              </li>
-                            ))}
+                                  <span>
+                                    <strong>{exame.nome}</strong>
+                                    {exame.resultado
+                                      ? ` — Resultado: ${exame.resultado}`
+                                      : ""}
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      abrirFicha(item.id, item.paciente, exame)
+                                    }
+                                    className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                                  >
+                                    <FileEdit className="w-4 h-4" />
+                                    Abrir Ficha
+                                  </button>
+                                </li>
+                              ))
+                            ) : (
+                              <li>Nenhum exame cadastrado</li>
+                            )}
                           </ul>
                         </td>
                       </tr>

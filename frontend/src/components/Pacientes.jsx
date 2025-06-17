@@ -14,8 +14,15 @@ const Pacientes = () => {
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Token não encontrado. Faça login novamente.");
         const response = await fetch(
-          "http://localhost:5000/api/medico/pacientes"
+          "http://localhost:5000/api/medico/pacientes",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!response.ok) throw new Error("Erro ao carregar pacientes");
         const data = await response.json();
@@ -27,7 +34,13 @@ const Pacientes = () => {
 
     const fetchAgendamentos = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/medico/agenda");
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Token não encontrado. Faça login novamente.");
+        const response = await fetch("http://localhost:5000/api/medico/agenda", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) throw new Error("Erro ao carregar agendamentos");
         const data = await response.json();
         setAgendamentos(data);
@@ -50,6 +63,7 @@ const Pacientes = () => {
     const agendamento = agendamentos.find((ag) => ag.paciente === paciente);
     return agendamento && agendamento.fichas ? agendamento.fichas.length : 0;
   };
+
   return (
     <>
       <HeaderMedico />

@@ -11,7 +11,6 @@ const HeaderMedico = () => {
         <h1 className="text-2xl font-bold">Painel Médico</h1>
         <nav className="flex flex-1 items-center justify-end">
           <ul className="flex items-center gap-6 text-sm text-xl">
-            <li onClick={()=> navigate("/ficha")} className=" cursor-pointer">Ficha</li>
             <li onClick={()=> navigate("/pacientes")} className=" cursor-pointer">Paciente</li>
             <li onClick={()=> navigate("/agenda")} className=" cursor-pointer">Agenda</li>
             <li onClick={()=> navigate("/")} className=" cursor-pointer">Sair</li>
