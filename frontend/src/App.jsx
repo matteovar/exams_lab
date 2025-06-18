@@ -16,6 +16,8 @@ import Agenda from "./components/Agenda";
 import DashboardUsuario from "./components/DashboardUsuario";
 import Resultados from "./components/Resultados";
 import PacienteDetalhes from "./components/PacienteDetalhes";
+import PrivateRoute from "./components/PrivateRoute";
+import RoleRoute from "./components/RoleRoute";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -34,7 +36,7 @@ const AppWrapper = () => {
 
     const rotaSemHeader =
       rotasSemHeader.includes(location.pathname) ||
-      location.pathname.startsWith("/pacientes/"); // Para rotas dinâmicas
+      location.pathname.startsWith("/pacientes/");
 
     setShowHeader(!rotaSemHeader);
   }, [location]);
@@ -43,15 +45,75 @@ const AppWrapper = () => {
     <>
       {showHeader && <Header />}
       <Routes>
-        <Route path="/agendar-exames" element={<AgendarExames />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard-usuario" element={<DashboardUsuario />} />
-        <Route path="/dashboard-medico" element={<DashboardMedico />} />
-        <Route path="/ficha" element={<Ficha />} />
-        <Route path="/pacientes" element={<Pacientes />} />
-        <Route path="/pacientes/:nome" element={<PacienteDetalhes />} />
-        <Route path="/agenda" element={<Agenda />} />
-        <Route path="/resultados" element={<Resultados />} />
+
+        {/* Usuário comum */}
+        <Route
+          path="/agendar-exames"
+          element={
+            <RoleRoute role="usuario">
+              <AgendarExames />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/dashboard-usuario"
+          element={
+            <RoleRoute role="usuario">
+              <DashboardUsuario />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/resultados"
+          element={
+            <RoleRoute role="usuario">
+              <Resultados />
+            </RoleRoute>
+          }
+        />
+
+        {/* Médico */}
+        <Route
+          path="/dashboard-medico"
+          element={
+            <RoleRoute role="medico">
+              <DashboardMedico />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/ficha"
+          element={
+            <RoleRoute role="medico">
+              <Ficha />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/pacientes"
+          element={
+            <RoleRoute role="medico">
+              <Pacientes />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/pacientes/:nome"
+          element={
+            <RoleRoute role="medico">
+              <PacienteDetalhes />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/agenda"
+          element={
+            <RoleRoute role="medico">
+              <Agenda />
+            </RoleRoute>
+          }
+        />
       </Routes>
     </>
   );

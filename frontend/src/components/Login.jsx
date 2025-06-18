@@ -14,19 +14,25 @@ const Login = () => {
     setLoading(true);
     setError("");
 
+    const cleanCpf = cpf.replace(/\D/g, "");
+
     try {
       const response = await fetch("http://localhost:5000/api/usuario/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ cpf, senha, tipo: tipoAcesso }),
+        body: JSON.stringify({ cpf: cleanCpf, senha, tipo: tipoAcesso }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.token) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ cpf: cpf, tipo: tipoAcesso })
+        );
         navigate(
           data.redirect ||
             (tipoAcesso === "medico"

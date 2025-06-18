@@ -12,3 +12,4 @@ db = client["LabAccess"]
 
 medico_collection = db["medicos"]
 usuario_collection = db["usuarios"]
+agendamento_collection = db["agendamentos"]

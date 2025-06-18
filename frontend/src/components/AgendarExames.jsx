@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeaderUsuario from "./HeaderUsuario";
 
 const AgendarExames = () => {
@@ -6,35 +6,20 @@ const AgendarExames = () => {
   const [dataExame, setDataExame] = useState("");
   const [horario, setHorario] = useState("");
   const [observacoes, setObservacoes] = useState("");
+  const [medicos, setMedicos] = useState([]);
+  const [medicoSelecionado, setMedicoSelecionado] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   const examesDisponiveis = [
-    {
-      nome: "Hemograma",
-      valorReferencia: "Hemoglobina (12-16 g/dL), Hematócrito (36-46%)",
-    },
-    {
-      nome: "Raio-X",
-      valorReferencia: "Normal sem alterações visíveis",
-    },
-    {
-      nome: "Ultrassom",
-      valorReferencia: "Órgãos sem alterações",
-    },
-    {
-      nome: "Ressonância Magnética",
-      valorReferencia: "Imagens normais",
-    },
-    {
-      nome: "Consulta Clínica",
-      valorReferencia: "N/A",
-    },
-    {
-      nome: "Eletrocardiograma",
-      valorReferencia: "Ritmo sinusal normal",
-    },
+    { nome: "Hemograma" },
+    { nome: "Raio-X" },
+    { nome: "Ultrassom" },
+    { nome: "Ressonância Magnética" },
+    { nome: "Consulta Clínica" },
+    { nome: "Eletrocardiograma" },
   ];
 
   const horariosDisponiveis = [
@@ -48,15 +33,29 @@ const AgendarExames = () => {
   ];
 
   const hoje = new Date().toISOString().split("T")[0];
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/medico/lista")
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao carregar médicos");
+        return res.json();
+      })
+      .then((data) => setMedicos(data))
+      .catch((err) => setError(err.message));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
 
-    // Validação da data (não pode ser passada)
     if (dataExame < hoje) {
       setError("Data inválida. Escolha uma data igual ou posterior a hoje.");
+      return;
+    }
+    if (!medicoSelecionado) {
+      setError("Selecione um médico responsável.");
       return;
     }
 
@@ -64,43 +63,39 @@ const AgendarExames = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/usuario/agendar-exame",
+        "http://localhost:5000/api/agendamento/agendamento",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            nomeExame,
-            dataExame,
-            horario,
+            tipo_exame: nomeExame,
+            data_exame: `${dataExame}T${horario}:00`,
             observacoes,
+            medico_responsavel: medicoSelecionado,
           }),
         }
       );
 
-      const data = await response.json();
-
-      if (data.success) {
-        setSuccess(true);
-        setNomeExame("");
-        setDataExame("");
-        setHorario("");
-        setObservacoes("");
-      } else {
-        setError(data.message || "Erro ao agendar exame.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Erro ao agendar exame");
       }
+
+      setSuccess(true);
+      setNomeExame("");
+      setDataExame("");
+      setHorario("");
+      setObservacoes("");
+      setMedicoSelecionado("");
     } catch (err) {
-      console.error("Erro ao agendar exame:", err);
-      setError("Erro ao agendar exame. Tente novamente.");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
-  const exameSelecionado = examesDisponiveis.find(
-    (exame) => exame.nome === nomeExame
-  );
 
   return (
     <>
@@ -112,9 +107,7 @@ const AgendarExames = () => {
         </p>
 
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            Formulário de Agendamento
-          </h2>
+          <h2 className="text-xl font-semibold mb-4">Formulário de Agendamento</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -133,8 +126,6 @@ const AgendarExames = () => {
                 ))}
               </select>
             </div>
-
-        
 
             <div>
               <label className="block mb-1">Data do Agendamento:</label>
@@ -166,6 +157,23 @@ const AgendarExames = () => {
             </div>
 
             <div>
+              <label className="block mb-1">Médico Responsável:</label>
+              <select
+                value={medicoSelecionado}
+                onChange={(e) => setMedicoSelecionado(e.target.value)}
+                required
+                className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="">Selecione um médico</option>
+                {medicos.map((medico) => (
+                  <option key={medico.cpf} value={medico.cpf}>
+                    {medico.nome} — {medico.cpf}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label className="block mb-1">Observações (Opcional):</label>
               <textarea
                 value={observacoes}
@@ -184,6 +192,7 @@ const AgendarExames = () => {
                 !nomeExame ||
                 !dataExame ||
                 !horario ||
+                !medicoSelecionado ||
                 dataExame < hoje
               }
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
@@ -192,9 +201,7 @@ const AgendarExames = () => {
             </button>
 
             {success && (
-              <p className="mt-2 text-green-600">
-                Agendamento realizado com sucesso!
-              </p>
+              <p className="mt-2 text-green-600">Agendamento realizado com sucesso!</p>
             )}
           </form>
         </div>

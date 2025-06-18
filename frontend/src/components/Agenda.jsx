@@ -1,62 +1,71 @@
 import HeaderMedico from "./HeaderMedico";
 import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, FileEdit } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const Agenda = () => {
   const [agenda, setAgenda] = useState([]);
+  const [medicos, setMedicos] = useState({}); // objeto chaveado por cpf
   const [expanded, setExpanded] = useState(null);
-  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
-  const navigate = useNavigate();
+  const [data, setData] = useState("");
 
-  useEffect(() => {
-    fetchAgenda();
-    // eslint-disable-next-line
-  }, [data]);
+  const toggleExpand = (id) => {
+    setExpanded(expanded === id ? null : id);
+  };
 
+  const abrirFicha = (id, cpf, item) => {
+    console.log("Abrindo ficha de:", cpf, item);
+  };
+
+  // Busca agenda do backend
   const fetchAgenda = async () => {
     try {
-      const token = localStorage.getItem("token"); // Certifique-se que o token está salvo como "token"
-      if (!token) {
-        console.error("Token não encontrado. Faça login novamente.");
-        return;
-      }
-
+      const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/medico/agenda?data=${data}`,
+        `http://localhost:5000/api/agendamento/agendamento${
+          data ? `?data=${data}` : ""
+        }`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Erro na resposta:", errorData);
-        return;
-      }
-
-      const dataResponse = await response.json();
-      setAgenda(dataResponse);
+      if (!response.ok) throw new Error("Erro ao buscar agenda");
+      const dataAgenda = await response.json();
+      setAgenda(dataAgenda);
     } catch (error) {
-      console.error("Erro ao carregar agenda:", error);
+      console.error("Erro ao buscar agenda:", error);
     }
   };
 
-  const toggleExpand = (id) => {
-    setExpanded(expanded === id ? null : id);
-  };
+  // Busca lista de médicos do backend
+  const fetchMedicos = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token:", token); // Debug
 
-  const abrirFicha = (pacienteId, pacienteNome, exame) => {
-    navigate(`/ficha`, {
-      state: {
-        pacienteId: pacienteId,
-        pacienteNome: pacienteNome,
-        exameNome: exame.nome,
-      },
-    });
+      const response = await fetch(`http://localhost:5000/api/medico/lista`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 401) {
+        console.error("Token inválido/expirado");
+        // Handle token refresh or redirect to login
+        return;
+      }
+
+      // Rest of your code...
+    } catch (error) {
+      console.error("Erro ao buscar médicos:", error);
+    }
   };
+  useEffect(() => {
+    fetchAgenda();
+    fetchMedicos();
+  }, [data]);
 
   return (
     <>
@@ -78,79 +87,81 @@ const Agenda = () => {
           <table className="w-full table-auto">
             <thead className="bg-blue-600 text-white">
               <tr>
-                <th className="px-4 py-2 text-left">Paciente</th>
+                <th className="px-4 py-2 text-left">Paciente (CPF)</th>
                 <th className="px-4 py-2 text-center">Data</th>
                 <th className="px-4 py-2 text-center">Hora</th>
-                <th className="px-4 py-2 text-center">Exames</th>
+                <th className="px-4 py-2 text-center">Exame</th>
+                <th className="px-4 py-2 text-center">Médico Responsável</th>
+                <th className="px-4 py-2 text-center">Detalhes</th>
               </tr>
             </thead>
             <tbody>
               {agenda.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="text-center py-6">
+                  <td colSpan="6" className="text-center py-6">
                     Nenhuma consulta ou exame para esta data.
                   </td>
                 </tr>
               ) : (
-                agenda.map((item) => (
-                  <React.Fragment key={item.id}>
-                    <tr className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{item.paciente}</td>
-                      <td className="px-4 py-3 text-center">{item.data}</td>
-                      <td className="px-4 py-3 text-center">{item.horario}</td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => toggleExpand(item.id)}
-                          className="transition-transform"
-                        >
-                          {expanded === item.id ? (
-                            <ChevronUp className="w-6 h-6 text-blue-600" />
-                          ) : (
-                            <ChevronDown className="w-6 h-6 text-blue-600" />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
+                agenda.map((item) => {
+                  const [dataExame, horaExame] = item.data_exame
+                    ? item.data_exame.split("T")
+                    : ["", ""];
 
-                    {expanded === item.id && (
-                      <tr className="bg-gray-50">
-                        <td colSpan="4" className="px-6 py-4">
-                          <h3 className="font-semibold mb-2">
-                            Exames para realizar:
-                          </h3>
-                          <ul className="list-disc list-inside space-y-2">
-                            {item.exames && item.exames.length > 0 ? (
-                              item.exames.map((exame, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-center justify-between"
-                                >
-                                  <span>
-                                    <strong>{exame.nome}</strong>
-                                    {exame.resultado
-                                      ? ` — Resultado: ${exame.resultado}`
-                                      : ""}
-                                  </span>
-                                  <button
-                                    onClick={() =>
-                                      abrirFicha(item.id, item.paciente, exame)
-                                    }
-                                    className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                                  >
-                                    <FileEdit className="w-4 h-4" />
-                                    Abrir Ficha
-                                  </button>
-                                </li>
-                              ))
+                  const cpfMedico =
+                    item.medico_responsavel || item.cpf_medico || "";
+
+                  return (
+                    <React.Fragment key={item._id}>
+                      <tr className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-3">{item.cpf_usuario}</td>
+                        <td className="px-4 py-3 text-center">{dataExame}</td>
+                        <td className="px-4 py-3 text-center">
+                          {horaExame ? horaExame.substring(0, 5) : ""}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {item.tipo_exame}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {medicos[cpfMedico] || cpfMedico || "Não informado"}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => toggleExpand(item._id)}
+                            className="transition-transform"
+                          >
+                            {expanded === item._id ? (
+                              <ChevronUp className="w-6 h-6 text-blue-600" />
                             ) : (
-                              <li>Nenhum exame cadastrado</li>
+                              <ChevronDown className="w-6 h-6 text-blue-600" />
                             )}
-                          </ul>
+                          </button>
                         </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))
+
+                      {expanded === item._id && (
+                        <tr className="bg-gray-50">
+                          <td colSpan="6" className="px-6 py-4">
+                            <h3 className="font-semibold mb-2">Observações:</h3>
+                            <p>{item.observacoes || "Nenhuma observação."}</p>
+                            <h3 className="font-semibold mt-4 mb-2">
+                              Status do Agendamento:
+                            </h3>
+                            <p>{item.status}</p>
+                            <button
+                              onClick={() =>
+                                abrirFicha(item._id, item.cpf_usuario, item)
+                              }
+                              className="mt-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            >
+                              Abrir Ficha
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
               )}
             </tbody>
           </table>
