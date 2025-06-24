@@ -1,19 +1,27 @@
 import HeaderMedico from "./HeaderMedico";
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Agenda = () => {
   const [agenda, setAgenda] = useState([]);
   const [medicos, setMedicos] = useState({}); // objeto chaveado por cpf
   const [expanded, setExpanded] = useState(null);
   const [data, setData] = useState("");
+  const navigate = useNavigate();
 
   const toggleExpand = (id) => {
     setExpanded(expanded === id ? null : id);
   };
 
   const abrirFicha = (id, cpf, item) => {
-    console.log("Abrindo ficha de:", cpf, item);
+    navigate("/ficha", {
+      state: {
+        pacienteId: cpf, // CPF do paciente
+        pacienteNome: cpf, // Você pode ajustar se tiver o nome, mas por enquanto é o CPF
+        exameNome: item.tipo_exame, // O nome do exame
+      },
+    });
   };
 
   // Busca agenda do backend
@@ -31,6 +39,7 @@ const Agenda = () => {
         }
       );
       if (!response.ok) throw new Error("Erro ao buscar agenda");
+
       const dataAgenda = await response.json();
       setAgenda(dataAgenda);
     } catch (error) {
@@ -42,8 +51,6 @@ const Agenda = () => {
   const fetchMedicos = async () => {
     try {
       const token = localStorage.getItem("token");
-      console.log("Token:", token); // Debug
-
       const response = await fetch(`http://localhost:5000/api/medico/lista`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -51,17 +58,19 @@ const Agenda = () => {
         },
       });
 
-      if (response.status === 401) {
-        console.error("Token inválido/expirado");
-        // Handle token refresh or redirect to login
-        return;
-      }
+      if (!response.ok) throw new Error("Erro ao buscar médicos");
 
-      // Rest of your code...
+      const data = await response.json();
+      const medicosMap = {};
+      data.forEach((m) => {
+        medicosMap[m.cpf] = m.nome;
+      });
+      setMedicos(medicosMap);
     } catch (error) {
       console.error("Erro ao buscar médicos:", error);
     }
   };
+
   useEffect(() => {
     fetchAgenda();
     fetchMedicos();

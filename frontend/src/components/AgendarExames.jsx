@@ -36,7 +36,14 @@ const AgendarExames = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/medico/lista")
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/medico/lista", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Erro ao carregar médicos");
         return res.json();
@@ -74,7 +81,7 @@ const AgendarExames = () => {
             tipo_exame: nomeExame,
             data_exame: `${dataExame}T${horario}:00`,
             observacoes,
-            medico_responsavel: medicoSelecionado,
+            cpf_medico: medicoSelecionado, // ✅ correto
           }),
         }
       );
@@ -107,7 +114,9 @@ const AgendarExames = () => {
         </p>
 
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Formulário de Agendamento</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Formulário de Agendamento
+          </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -201,7 +210,9 @@ const AgendarExames = () => {
             </button>
 
             {success && (
-              <p className="mt-2 text-green-600">Agendamento realizado com sucesso!</p>
+              <p className="mt-2 text-green-600">
+                Agendamento realizado com sucesso!
+              </p>
             )}
           </form>
         </div>
