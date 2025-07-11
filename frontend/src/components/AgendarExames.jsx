@@ -81,7 +81,7 @@ const AgendarExames = () => {
             tipo_exame: nomeExame,
             data_exame: `${dataExame}T${horario}:00`,
             observacoes,
-            cpf_medico: medicoSelecionado, // ✅ correto
+            cpf_medico: medicoSelecionado, 
           }),
         }
       );

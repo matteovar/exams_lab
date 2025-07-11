@@ -5,11 +5,12 @@ const HeaderUsuario = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const nome = user?.nome || "Usuário";
+
   const handleLogout = () => {
-    // Limpa token e dados do usuário
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    // Redireciona para página inicial ou login
     navigate("/");
   };
 
@@ -20,7 +21,7 @@ const HeaderUsuario = () => {
           onClick={() => navigate("/dashboard-usuario")}
           className="text-2xl font-bold cursor-pointer"
         >
-          Painel #nome do usuario
+          {`Painel do ${nome}`}
         </h1>
         <nav className="flex flex-1 items-center justify-end">
           <ul className="flex items-center gap-6 text-sm text-xl">

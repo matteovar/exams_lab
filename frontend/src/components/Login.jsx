@@ -35,9 +35,9 @@ const Login = () => {
         );
         navigate(
           data.redirect ||
-            (tipoAcesso === "medico"
-              ? "/dashboard-medico"
-              : "/dashboard-usuario")
+          (tipoAcesso === "medico"
+            ? "/dashboard-medico"
+            : "/dashboard-usuario")
         );
       } else {
         setError(data.message || "Erro ao fazer login.");
@@ -50,10 +50,8 @@ const Login = () => {
   };
 
   const formatCPF = (value) => {
-    // Remove tudo que não é dígito
     const cleaned = value.replace(/\D/g, "");
 
-    // Aplica a formatação do CPF: 000.000.000-00
     let formatted = cleaned;
     if (cleaned.length > 3) {
       formatted = `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
@@ -65,7 +63,7 @@ const Login = () => {
       formatted = `${formatted.slice(0, 11)}-${formatted.slice(11, 13)}`;
     }
 
-    return formatted.slice(0, 14); // Limita ao tamanho máximo do CPF
+    return formatted.slice(0, 14); 
   };
 
   const handleCPFChange = (e) => {
@@ -74,11 +72,9 @@ const Login = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* LADO ESQUERDO */}
+    <div className="flex h-screen overflow-hidden ">
       <div className="w-1/2 flex items-center justify-center bg-white">
         {!tipoAcesso ? (
-          // Etapa 1: Escolha do tipo de acesso
           <div className="text-center space-y-6">
             <h2 className="text-3xl font-bold text-[#0058CD]">
               Tipo de Acesso
@@ -99,7 +95,6 @@ const Login = () => {
             </div>
           </div>
         ) : (
-          // Etapa 2: Login
           <form
             className="w-3/4 max-w-md bg-white p-8 rounded shadow-md"
             onSubmit={handleLogin}
@@ -167,7 +162,15 @@ const Login = () => {
                 "Entrar"
               )}
             </button>
-
+            {tipoAcesso === "usuario" && (
+              <button
+                type="button"
+                onClick={() => navigate("/cadastro-usuario")}
+                className="w-full mt-2 border-2 border-[#0085E3] text-[#0085E3] py-2 rounded bg-transparent hover:bg-[#0085E3] hover:text-white transition"
+              >
+                Cadastrar-se
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {

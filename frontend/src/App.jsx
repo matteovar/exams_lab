@@ -18,6 +18,7 @@ import Resultados from "./components/Resultados";
 import PacienteDetalhes from "./components/PacienteDetalhes";
 import PrivateRoute from "./components/PrivateRoute";
 import RoleRoute from "./components/RoleRoute";
+import CadastroUsuario from "./components/Cadastro_usuario";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -46,6 +47,7 @@ const AppWrapper = () => {
       {showHeader && <Header />}
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
 
         {/* Usuário comum */}
         <Route

@@ -4,10 +4,15 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Agenda = () => {
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
   const [agenda, setAgenda] = useState([]);
   const [medicos, setMedicos] = useState({}); // objeto chaveado por cpf
   const [expanded, setExpanded] = useState(null);
-  const [data, setData] = useState("");
+  const [data, setData] = useState(getToday());
   const navigate = useNavigate();
 
   const toggleExpand = (id) => {
@@ -29,8 +34,7 @@ const Agenda = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/agendamento/agendamento${
-          data ? `?data=${data}` : ""
+        `http://localhost:5000/api/agendamento/agendamento${data ? `?data=${data}` : ""
         }`,
         {
           headers: {
