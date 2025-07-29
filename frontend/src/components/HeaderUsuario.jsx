@@ -21,7 +21,7 @@ const HeaderUsuario = () => {
           onClick={() => navigate("/dashboard-usuario")}
           className="text-2xl font-bold cursor-pointer"
         >
-          {`Painel do ${nome}`}
+          Painel do Paciente
         </h1>
         <nav className="flex flex-1 items-center justify-end">
           <ul className="flex items-center gap-6 text-sm text-xl">

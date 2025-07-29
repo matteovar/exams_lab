@@ -42,8 +42,8 @@ const VerFicha = () => {
   return (
     <>
       <HeaderMedico />
-      <div className="p-4 max-w-lg mx-auto">
-        <div className="bg-white shadow rounded-lg p-6 w-full max-w-xl">
+      <div className="p-4 max-w-5xl mx-auto min-h-screen mt-24">
+        <div className="bg-white shadow rounded-lg p-6">
           <h1 className="text-2xl font-bold mb-4">Ficha de Exame</h1>
           <p><strong>Paciente:</strong> {ficha.pacienteNome || ficha.pacienteId}</p>
           <p><strong>Exame:</strong> {ficha.exameNome}</p>

@@ -35,7 +35,7 @@ def get_pacientes():
     if tipo != "medico":
         return jsonify({"msg": "Apenas médicos podem acessar esta rota"}), 403
 
-    pacientes = medico_collection.find({"cpf_medico": cpf})
+    pacientes = usuario_collection.find({"tipo": "usuario"})
     nomes = [paciente["nome"] for paciente in pacientes]
     return jsonify(nomes), 200
 
@@ -63,6 +63,33 @@ def add_paciente():
 
     result = medico_collection.insert_one(paciente)
     return jsonify({"id": str(result.inserted_id)}), 201
+
+@medico_bp.route("/pacientes/<nome>", methods=["GET"])
+@jwt_required()
+def get_paciente_por_nome(nome):
+    identity = get_jwt_identity()
+    cpf, tipo = identity.split(":")
+
+    if tipo != "medico":
+        return jsonify({"msg": "Apenas médicos podem acessar esta rota"}), 403
+
+    paciente = usuario_collection.find_one({"nome": nome})
+    if not paciente:
+        return jsonify({"msg": "Paciente não encontrado"}), 404
+
+    fichas = list(ficha_collection.find({"pacienteNome": nome}))
+    for ficha in fichas:
+        ficha["_id"] = str(ficha["_id"])
+
+    return jsonify({
+        "paciente": {
+            "nome": paciente.get("nome"),
+            "idade": paciente.get("idade"),
+            "contato": paciente.get("contato"),
+            "problema_de_saude": paciente.get("problema_de_saude")
+        },
+        "fichas": fichas
+    }), 200
 
 
 @medico_bp.route("/lista", methods=["GET"])

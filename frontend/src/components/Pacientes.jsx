@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const Pacientes = () => {
   const [pacientes, setPacientes] = useState([]);
-  const [agendamentos, setAgendamentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,40 +28,17 @@ const Pacientes = () => {
         setPacientes(data);
       } catch (err) {
         setError(err.message);
-      }
-    };
-
-    const fetchAgendamentos = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Token não encontrado. Faça login novamente.");
-        const response = await fetch("http://localhost:5000/api/medico/agenda", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) throw new Error("Erro ao carregar agendamentos");
-        const data = await response.json();
-        setAgendamentos(data);
-      } catch (err) {
-        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPacientes();
-    fetchAgendamentos();
   }, []);
 
   const filteredPacientes = pacientes.filter((paciente) =>
     paciente.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const getFichasCount = (paciente) => {
-    const agendamento = agendamentos.find((ag) => ag.paciente === paciente);
-    return agendamento && agendamento.fichas ? agendamento.fichas.length : 0;
-  };
 
   return (
     <>
@@ -93,7 +69,6 @@ const Pacientes = () => {
               <thead className="bg-blue-600 text-white">
                 <tr>
                   <th className="px-4 py-2 text-left">Paciente</th>
-                  <th className="px-4 py-2 text-center">Últimos Exames</th>
                   <th className="px-4 py-2 text-center">Ações</th>
                 </tr>
               </thead>
@@ -101,10 +76,6 @@ const Pacientes = () => {
                 {filteredPacientes.map((paciente, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium">{paciente}</td>
-                    <td className="px-4 py-3 text-center">
-                      {getFichasCount(paciente)} ficha
-                      {getFichasCount(paciente) !== 1 ? "s" : ""}
-                    </td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() =>

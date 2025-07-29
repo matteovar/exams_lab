@@ -13,8 +13,14 @@ const PacienteDetalhes = () => {
   useEffect(() => {
     const fetchExamesPaciente = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:5000/api/medico/pacientes/${nome}`
+          `http://localhost:5000/api/medico/pacientes/${nome}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!response.ok) throw new Error("Erro ao carregar dados do paciente");
         const data = await response.json();
@@ -87,56 +93,39 @@ const PacienteDetalhes = () => {
 
             <div className="md:col-span-2">
               <h2 className="font-semibold mb-4">Fichas de Exames</h2>
-
               <div className="space-y-4">
-                {dados?.fichas?.map((ficha) => (
-                  <div key={ficha.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium">Ficha {ficha.id}</h3>
-                        <p className="text-sm text-gray-500">
-                          Aberta em {ficha.data_de_abertura || "Sem data"}
+                {dados?.fichas?.length > 0 ? (
+                  dados.fichas.map((ficha) => (
+                    <div key={ficha._id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">Exame: {ficha.exameNome}</h3>
+                          <p className="text-sm text-gray-500">
+                            Data: {ficha.dataPreenchimento
+                              ? new Date(ficha.dataPreenchimento).toLocaleString()
+                              : "Sem data"}
+                          </p>
+                        </div>
+                        <button
+                          className="text-blue-600 hover:underline"
+                          onClick={() => navigate(`/ver-ficha/${ficha._id}`)}
+                        >
+                          Ver Ficha
+                        </button>
+                      </div>
+                      <div className="mt-2">
+                        <p>
+                          <strong>Resultado:</strong> {ficha.resultado}
+                        </p>
+                        <p>
+                          <strong>Observações:</strong> {ficha.observacoes || "Nenhuma"}
                         </p>
                       </div>
-                      <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:underline">
-                          Todos os exames
-                        </button>
-                        <button className="text-blue-600 hover:underline">
-                          Laudo evolutivo
-                        </button>
-                        <button className="text-blue-600 hover:underline">
-                          Imprimir
-                        </button>
-                        <button className="text-blue-600 hover:underline">
-                          PDF-PT
-                        </button>
-                      </div>
                     </div>
-
-                    {ficha.exames.length > 0 ? (
-                      <div className="mt-4 pl-4">
-                        <h4 className="font-medium mb-2">
-                          Exames desta ficha:
-                        </h4>
-                        <ul className="space-y-2">
-                          {ficha.exames.map((exame, idx) => (
-                            <li key={idx} className="border-b pb-2">
-                              <p>
-                                <strong>{exame.nome}</strong> -{" "}
-                                {exame.resultado || "Resultado não disponível"}
-                              </p>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <p className="mt-4 pl-4 text-gray-500">
-                        Nenhum exame nesta ficha
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-gray-500">Nenhuma ficha encontrada para este paciente.</p>
+                )}
               </div>
             </div>
           </div>
