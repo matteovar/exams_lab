@@ -22,11 +22,15 @@ const Agenda = () => {
   const abrirFicha = (id, cpf, item) => {
     navigate("/ficha", {
       state: {
-        pacienteId: cpf, // CPF do paciente
-        pacienteNome: cpf, // Você pode ajustar se tiver o nome, mas por enquanto é o CPF
-        exameNome: item.tipo_exame, // O nome do exame
+        pacienteId: cpf,
+        pacienteNome: cpf, // ajuste se tiver o nome
+        exameNome: item.tipo_exame,
       },
     });
+  };
+
+  const verFicha = (fichaId) => {
+    navigate(`/ver-ficha/${fichaId}`);
   };
 
   // Busca agenda do backend
@@ -34,8 +38,7 @@ const Agenda = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5000/api/agendamento/agendamento${data ? `?data=${data}` : ""
-        }`,
+        `http://localhost:5000/api/agendamento/agendamento${data ? `?data=${data}` : ""}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -51,7 +54,6 @@ const Agenda = () => {
     }
   };
 
-  // Busca lista de médicos do backend
   const fetchMedicos = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -161,14 +163,23 @@ const Agenda = () => {
                               Status do Agendamento:
                             </h3>
                             <p>{item.status}</p>
-                            <button
-                              onClick={() =>
-                                abrirFicha(item._id, item.cpf_usuario, item)
-                              }
-                              className="mt-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                            >
-                              Abrir Ficha
-                            </button>
+                            {item.status === "concluído" && item.ficha_id ? (
+                              <button
+                                onClick={() => verFicha(item.ficha_id)}
+                                className="mt-4 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                              >
+                                Ver Ficha
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  abrirFicha(item._id, item.cpf_usuario, item)
+                                }
+                                className="mt-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                              >
+                                Abrir Ficha
+                              </button>
+                            )}
                           </td>
                         </tr>
                       )}

@@ -19,6 +19,7 @@ import PacienteDetalhes from "./components/PacienteDetalhes";
 import PrivateRoute from "./components/PrivateRoute";
 import RoleRoute from "./components/RoleRoute";
 import CadastroUsuario from "./components/Cadastro_usuario";
+import VerFicha from "./components/VerFicha";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -33,11 +34,14 @@ const AppWrapper = () => {
       "/pacientes",
       "/agendar-exames",
       "/agenda",
+      "/ver-ficha",
     ];
 
     const rotaSemHeader =
       rotasSemHeader.includes(location.pathname) ||
-      location.pathname.startsWith("/pacientes/");
+      location.pathname.startsWith("/pacientes/") ||
+      location.pathname.startsWith("/ver-ficha/") ||
+      location.pathname.startsWith("/editar-ficha/");
 
     setShowHeader(!rotaSemHeader);
   }, [location]);
@@ -108,11 +112,21 @@ const AppWrapper = () => {
             </RoleRoute>
           }
         />
+
+
         <Route
           path="/agenda"
           element={
             <RoleRoute role="medico">
               <Agenda />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/ver-ficha/:fichaId"
+          element={
+            <RoleRoute role="medico">
+              <VerFicha />
             </RoleRoute>
           }
         />

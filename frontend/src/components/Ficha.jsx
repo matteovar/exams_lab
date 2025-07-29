@@ -35,18 +35,21 @@ const Ficha = () => {
       observacoes,
       dataPreenchimento: new Date().toISOString(),
     };
-
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch("http://localhost:5000/api/medico/fichas", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Adicione esta linha!
+        },
         body: JSON.stringify(ficha),
       });
 
       if (response.ok) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/dashboardmedico"); // Volta para o dashboard ou onde quiser
+          navigate("/agenda"); // Volta para o dashboard ou onde quiser
         }, 1500);
       } else {
         console.error("Erro ao salvar ficha");
@@ -115,9 +118,8 @@ const Ficha = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`px-4 py-2 rounded text-white ${
-                loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`px-4 py-2 rounded text-white ${loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
               {loading ? "Salvando..." : "Salvar Ficha"}
             </button>
