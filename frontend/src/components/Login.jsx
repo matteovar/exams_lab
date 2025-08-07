@@ -31,14 +31,15 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem(
           "user",
-          JSON.stringify({ cpf: cpf, tipo: tipoAcesso })
+          JSON.stringify({ cpf: cpf, tipo: data.tipo })
         );
-        navigate(
-          data.redirect ||
-          (tipoAcesso === "medico"
-            ? "/dashboard-medico"
-            : "/dashboard-usuario")
-        );
+        if (data.tipo === "admin") {
+          navigate("/cadastro-medico"); // ou outra rota de admin
+        } else if (data.tipo === "medico") {
+          navigate("/dashboard-medico");
+        } else {
+          navigate("/dashboard-usuario");
+        }
       } else {
         setError(data.message || "Erro ao fazer login.");
       }
@@ -63,7 +64,7 @@ const Login = () => {
       formatted = `${formatted.slice(0, 11)}-${formatted.slice(11, 13)}`;
     }
 
-    return formatted.slice(0, 14); 
+    return formatted.slice(0, 14);
   };
 
   const handleCPFChange = (e) => {

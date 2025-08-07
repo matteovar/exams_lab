@@ -3,7 +3,7 @@ from bson import ObjectId
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from models import agendamento_collection, ficha_collection
+from models import agendamento_collection, ficha_collection, usuario_collection
 
 agendamento_bp = Blueprint("agendamento", __name__)
 
@@ -25,20 +25,31 @@ def criar_agendamento():
 
     data = request.get_json()
 
-    required_fields = ["data_exame", "tipo_exame", "cpf_medico"]
+    required_fields = ["data_exame", "tipo_exame", "especialidade"]
     if not all(field in data for field in required_fields):
         return jsonify({"msg": "Dados incompletos para agendamento"}), 400
 
+    # BUSCA UM MÉDICO PELA ESPECIALIDADE
+    import random
+    medicos = list(usuario_collection.find({
+        "tipo": "medico",
+        "especialidade": data["especialidade"]
+    }))
+    if not medicos:
+        return jsonify({"msg": "Nenhum médico disponível para este exame"}), 400
+    medico = random.choice(medicos)
+
     agendamento = {
         "cpf_usuario": cpf_usuario,
-        "cpf_medico": data["cpf_medico"],
         "tipo_exame": data["tipo_exame"],
+        "especialidade": data["especialidade"],
         "data_exame": data["data_exame"],
         "status": "agendado",
-        "medico_responsavel": data.get("medico_responsavel"),
+        "cpf_medico": medico["cpf"],
+        "medico_responsavel": medico["nome"],
         "observacoes": data.get("observacoes", ""),
         "data_criacao": datetime.datetime.utcnow(),
-        "ficha_id": None  # Adicionado campo para referência da ficha
+        "ficha_id": None
     }
 
     result = agendamento_collection.insert_one(agendamento)
@@ -46,7 +57,6 @@ def criar_agendamento():
         "msg": "Agendamento criado com sucesso",
         "agendamento_id": str(result.inserted_id)
     }), 201
-
 
 @agendamento_bp.route("/agendamento", methods=["GET"])
 @jwt_required()

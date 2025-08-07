@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import HeaderUsuario from "./HeaderUsuario";
 
 const AgendarExames = () => {
@@ -6,22 +6,89 @@ const AgendarExames = () => {
   const [dataExame, setDataExame] = useState("");
   const [horario, setHorario] = useState("");
   const [observacoes, setObservacoes] = useState("");
-  const [medicos, setMedicos] = useState([]);
-  const [medicoSelecionado, setMedicoSelecionado] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   const examesDisponiveis = [
-    { nome: "Hemograma" },
-    { nome: "Raio-X" },
-    { nome: "Ultrassom" },
-    { nome: "Ressonância Magnética" },
-    { nome: "Consulta Clínica" },
-    { nome: "Eletrocardiograma" },
+    {nome: "Hemograma", especialidade: "Patologia Clínica"},
+    {nome: "Raio-X", especialidade: "Radiologia"},
+    {nome: "Ultrassom", especialidade: "Ultrassonografia"},
+    {nome: "Ressonância Magnética", especialidade: "Radiologia"},
+    {nome: "Consulta Clínica", especialidade: "Clínica Médica"},
+    {nome: "Eletrocardiograma", especialidade: "Cardiologia"},
+    {nome: "Tomografia Computadorizada", especialidade: "Radiologia"},
+    {nome: "Mamografia", especialidade: "Radiologia"},
+    {nome: "Colonoscopia", especialidade: "Gastroenterologia"},
+    {nome: "Endoscopia Digestiva", especialidade: "Gastroenterologia"},
+    {nome: "Teste de Esforço", especialidade: "Cardiologia"},
+    {nome: "Ecocardiograma", especialidade: "Cardiologia"},
+    {nome: "Papanicolau", especialidade: "Ginecologia"},
+    {nome: "Exame de Urina (EAS)", especialidade: "Patologia Clínica"},
+    {nome: "Glicemia em Jejum", especialidade: "Endocrinologia"},
+    {nome: "TSH e T4 Livre", especialidade: "Endocrinologia"},
+    {nome: "Exame de Fezes", especialidade: "Patologia Clínica"},
+    {nome: "Audiometria", especialidade: "Otorrinolaringologia"},
+    {nome: "Espirometria", especialidade: "Pneumologia"},
+    {nome: "Sorologia para HIV", especialidade: "Infectologia"},
+    {nome: "Sorologia para Hepatites", especialidade: "Infectologia"},
+    {nome: "Colesterol Total e Frações", especialidade: "Endocrinologia"},
+    {nome: "Beta HCG", especialidade: "Ginecologia"},
+    {nome: "Densitometria Óssea", especialidade: "Reumatologia"},
+    {nome: "Ureia e Creatinina", especialidade: "Nefrologia"},
+    {nome: "Proteinúria de 24 horas", especialidade: "Nefrologia"},
+    {nome: "Gasometria arterial", especialidade: "Patologia Clínica"},
+    {nome: "VHS", especialidade: "Patologia Clínica"},
+    {nome: "PCR (Proteína C Reativa)", especialidade: "Patologia Clínica"},
+    {nome: "Tipagem Sanguínea e Fator Rh", especialidade: "Imuno-hematologia"},
+    {nome: "TP e TTPa", especialidade: "Hematologia"},
+    {nome: "Coagulograma completo", especialidade: "Hematologia"},
+    {nome: "EEG (Eletroencefalograma)", especialidade: "Neurologia"},
+    {nome: "Potenciais Evocados", especialidade: "Neurologia"},
+    {nome: "MAPA", especialidade: "Cardiologia"},
+    {nome: "Holter 24h", especialidade: "Cardiologia"},
+    {nome: "Cateterismo Cardíaco", especialidade: "Cardiologia"},
+    {nome: "Radiografia de Tórax", especialidade: "Radiologia"},
+    {nome: "Radiografia de Coluna", especialidade: "Radiologia"},
+    {nome: "Urografia Excretora", especialidade: "Urologia"},
+    {nome: "Histerossalpingografia", especialidade: "Ginecologia"},
+    {nome: "Artrografia", especialidade: "Radiologia"},
+    {nome: "Cintilografia Óssea", especialidade: "Medicina Nuclear"},
+    {nome: "Teste do Pezinho", especialidade: "Genética"},
+    {nome: "Cariótipo", especialidade: "Genética"},
+    {nome: "PCR para COVID-19", especialidade: "Biologia Molecular"},
+    {nome: "Exame de DNA", especialidade: "Genética"},
+    {nome: "Exoma completo", especialidade: "Genética"},
+    {nome: "Ultrassom Obstétrico", especialidade: "Obstetrícia"},
+    {nome: "Ultrassom Transvaginal", especialidade: "Ginecologia"},
+    {nome: "Doppler Fetal", especialidade: "Obstetrícia"},
+    {nome: "Colposcopia", especialidade: "Ginecologia"},
+    {nome: "Biópsia de Colo do Útero", especialidade: "Ginecologia"},
+    {nome: "Triagem Auditiva Neonatal", especialidade: "Neonatologia"},
+    {nome: "Triagem Oftalmológica Neonatal", especialidade: "Neonatologia"},
+    {nome: "Tonometria", especialidade: "Oftalmologia"},
+    {nome: "Mapeamento de Retina", especialidade: "Oftalmologia"},
+    {nome: "Campimetria Visual", especialidade: "Oftalmologia"},
+    {nome: "Fundoscopia", especialidade: "Oftalmologia"},
+    {nome: "Nasofibrolaringoscopia", especialidade: "Otorrinolaringologia"},
+    {nome: "Teste de Impedância Acústica", especialidade: "Otorrinolaringologia"},
+    {nome: "BERA", especialidade: "Otorrinolaringologia"},
+    {nome: "Polissonografia", especialidade: "Pneumologia"},
+    {nome: "Teste de Caminhada de 6 minutos", especialidade: "Pneumologia"},
+    {nome: "Ressonância de Joelho", especialidade: "Ortopedia"},
+    {nome: "Ressonância de Ombro", especialidade: "Ortopedia"},
+    {nome: "Artrocentese", especialidade: "Reumatologia"},
+    {nome: "FAN (Fator Antinuclear)", especialidade: "Reumatologia"},
+    {nome: "Fator Reumatoide", especialidade: "Reumatologia"},
+    {nome: "Anti-CCP", especialidade: "Reumatologia"},
+    {nome: "Teste rápido de Dengue", especialidade: "Infectologia"},
+    {nome: "Teste rápido de Zika", especialidade: "Infectologia"},
+    {nome: "Teste rápido de Chikungunya", especialidade: "Infectologia"},
+    {nome: "ELISA para HIV", especialidade: "Infectologia"},
+    {nome: "ELISA para Sífilis", especialidade: "Infectologia"},
+    {nome: "ELISA para Hepatites", especialidade: "Infectologia"},
+    {nome: "IgG e IgM para Rubéola", especialidade: "Imunologia"},
   ];
-
   const horariosDisponiveis = [
     "08:00",
     "09:00",
@@ -32,25 +99,10 @@ const AgendarExames = () => {
     "16:00",
   ];
 
+
+
   const hoje = new Date().toISOString().split("T")[0];
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    fetch("http://localhost:5000/api/medico/lista", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao carregar médicos");
-        return res.json();
-      })
-      .then((data) => setMedicos(data))
-      .catch((err) => setError(err.message));
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,14 +113,14 @@ const AgendarExames = () => {
       setError("Data inválida. Escolha uma data igual ou posterior a hoje.");
       return;
     }
-    if (!medicoSelecionado) {
-      setError("Selecione um médico responsável.");
-      return;
-    }
 
     setLoading(true);
 
     try {
+      // Busca a especialidade do exame selecionado
+      const exameSelecionado = examesDisponiveis.find((ex) => ex.nome === nomeExame);
+      const especialidade = exameSelecionado ? exameSelecionado.especialidade : "";
+
       const response = await fetch(
         "http://localhost:5000/api/agendamento/agendamento",
         {
@@ -79,9 +131,9 @@ const AgendarExames = () => {
           },
           body: JSON.stringify({
             tipo_exame: nomeExame,
+            especialidade, // Envie a especialidade junto!
             data_exame: `${dataExame}T${horario}:00`,
             observacoes,
-            cpf_medico: medicoSelecionado, 
           }),
         }
       );
@@ -96,7 +148,6 @@ const AgendarExames = () => {
       setDataExame("");
       setHorario("");
       setObservacoes("");
-      setMedicoSelecionado("");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -166,23 +217,6 @@ const AgendarExames = () => {
             </div>
 
             <div>
-              <label className="block mb-1">Médico Responsável:</label>
-              <select
-                value={medicoSelecionado}
-                onChange={(e) => setMedicoSelecionado(e.target.value)}
-                required
-                className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="">Selecione um médico</option>
-                {medicos.map((medico) => (
-                  <option key={medico.cpf} value={medico.cpf}>
-                    {medico.nome} — {medico.cpf}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
               <label className="block mb-1">Observações (Opcional):</label>
               <textarea
                 value={observacoes}
@@ -201,7 +235,6 @@ const AgendarExames = () => {
                 !nomeExame ||
                 !dataExame ||
                 !horario ||
-                !medicoSelecionado ||
                 dataExame < hoje
               }
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"

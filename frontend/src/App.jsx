@@ -20,6 +20,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import RoleRoute from "./components/RoleRoute";
 import CadastroUsuario from "./components/Cadastro_usuario";
 import VerFicha from "./components/VerFicha";
+import CadastroMedico from "./components/CadastroMedico";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -109,6 +110,15 @@ const AppWrapper = () => {
           element={
             <RoleRoute role="medico">
               <PacienteDetalhes />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/cadastro-medico"
+          element={
+            <RoleRoute role="admin">
+              <CadastroMedico />
             </RoleRoute>
           }
         />
