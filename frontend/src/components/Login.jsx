@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [tipoAcesso, setTipoAcesso] = useState(null);
   const [cpf, setCpf] = useState("");
   const [senha, setSenha] = useState("");
+  const [subTipo, setSubTipo] = useState("medico"); // para medico ou tecnico
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,13 +17,16 @@ const Login = () => {
 
     const cleanCpf = cpf.replace(/\D/g, "");
 
+    // tipo enviado: "usuario" ou "medico" ou "tecnico"
+    const tipoEnvio = tipoAcesso === "medico-tecnico" ? subTipo : tipoAcesso;
+
     try {
       const response = await fetch("http://localhost:5000/api/usuario/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ cpf: cleanCpf, senha, tipo: tipoAcesso }),
+        body: JSON.stringify({ cpf: cleanCpf, senha, tipo: tipoEnvio }),
       });
 
       const data = await response.json();
@@ -33,10 +37,13 @@ const Login = () => {
           "user",
           JSON.stringify({ cpf: cpf, tipo: data.tipo })
         );
+
         if (data.tipo === "admin") {
-          navigate("/cadastro-medico"); // ou outra rota de admin
+          navigate("/cadastro-medico");
         } else if (data.tipo === "medico") {
           navigate("/dashboard-medico");
+        } else if (data.tipo === "tecnico") {
+          navigate("/painel-coleta");
         } else {
           navigate("/dashboard-usuario");
         }
@@ -49,6 +56,8 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // Mesma função formatCPF, handleCPFChange...
 
   const formatCPF = (value) => {
     const cleaned = value.replace(/\D/g, "");
@@ -77,9 +86,7 @@ const Login = () => {
       <div className="w-1/2 flex items-center justify-center bg-white">
         {!tipoAcesso ? (
           <div className="text-center space-y-6">
-            <h2 className="text-3xl font-bold text-[#0058CD]">
-              Tipo de Acesso
-            </h2>
+            <h2 className="text-3xl font-bold text-[#0058CD]">Tipo de Acesso</h2>
             <div className="flex flex-col gap-4 items-center">
               <button
                 onClick={() => setTipoAcesso("usuario")}
@@ -88,10 +95,10 @@ const Login = () => {
                 Sou Usuário
               </button>
               <button
-                onClick={() => setTipoAcesso("medico")}
+                onClick={() => setTipoAcesso("medico-tecnico")}
                 className="w-64 bg-[#0085E3] text-white py-2 rounded hover:bg-[#0058CD] transition"
               >
-                Sou Médico
+                Sou Médico ou Técnico
               </button>
             </div>
           </div>
@@ -101,8 +108,29 @@ const Login = () => {
             onSubmit={handleLogin}
           >
             <h2 className="text-2xl font-bold text-[#0058CD] mb-6 text-center">
-              Login {tipoAcesso === "usuario" ? "do Usuário" : "do Médico"}
+              Login{" "}
+              {tipoAcesso === "usuario"
+                ? "do Usuário"
+                : tipoAcesso === "medico-tecnico"
+                ? subTipo === "medico"
+                  ? "do Médico"
+                  : "do Técnico"
+                : ""}
             </h2>
+
+            {tipoAcesso === "medico-tecnico" && (
+              <div className="mb-4">
+                <label className="block mb-2">Escolha:</label>
+                <select
+                  value={subTipo}
+                  onChange={(e) => setSubTipo(e.target.value)}
+                  className="w-full px-4 py-2 border rounded"
+                >
+                  <option value="medico">Médico</option>
+                  <option value="tecnico">Técnico</option>
+                </select>
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
@@ -163,6 +191,7 @@ const Login = () => {
                 "Entrar"
               )}
             </button>
+
             {tipoAcesso === "usuario" && (
               <button
                 type="button"
@@ -172,6 +201,7 @@ const Login = () => {
                 Cadastrar-se
               </button>
             )}
+
             <button
               type="button"
               onClick={() => {

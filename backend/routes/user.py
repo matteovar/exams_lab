@@ -10,30 +10,36 @@ bcrypt = Bcrypt()
 def limpar_cpf(cpf):
     return cpf.replace(".", "").replace("-", "").strip()
 
+def limpar_rg(rg):
+    return rg.replace(".", "").replace("-", "").strip()
+
 @usuario_bp.route("/register-medico", methods=["POST"])
 @jwt_required()
 def registrar_medico():
     identity = get_jwt_identity()
-    cpf, tipo = identity.split(":")
-    if tipo != "admin":
+    cpf_admin, tipo_usuario = identity.split(":")
+    if tipo_usuario != "admin":
         return jsonify({"msg": "Apenas administradores podem cadastrar médicos"}), 403
 
     data = request.get_json()
     if not data:
         return jsonify({"msg": "Requisição sem corpo JSON válido"}), 400
 
-    nome = data.get("nome")
+    nome = data.get("nome", "").strip()
     cpf = limpar_cpf(data.get("cpf", ""))
-    email = data.get("email", "").strip()
+    rg = limpar_rg(data.get("rg", ""))
+    data_nascimento = data.get("data_nascimento", "").strip()
     telefone = data.get("telefone", "").strip()
+    email = data.get("email", "").strip()
     crm = data.get("crm", "").strip()
+    crm_estado = data.get("crm_estado", "").strip()
     especialidade = data.get("especialidade", "").strip()
     senha = data.get("senha")
     confirma_senha = data.get("confirma_senha")
-    tipo = data.get("tipo")
+    tipo = data.get("tipo", "").strip()
 
-    if not nome or not cpf or not senha or not tipo:
-        return jsonify({"msg": "Nome, CPF, senha e tipo são obrigatórios"}), 400
+    if not nome or not cpf or not rg or not senha or not tipo:
+        return jsonify({"msg": "Nome, CPF, RG, senha e tipo são obrigatórios"}), 400
 
     if senha != confirma_senha:
         return jsonify({"msg": "As senhas não coincidem"}), 400
@@ -43,18 +49,23 @@ def registrar_medico():
 
     hashed = bcrypt.generate_password_hash(senha).decode("utf-8")
 
-    usuario_collection.insert_one({
+    usuario_doc = {
         "nome": nome,
         "cpf": cpf,
-        "email": email,
-        "crm": crm,  
-        "especialidade": especialidade,  
+        "rg": rg,
+        "data_nascimento": data_nascimento,
         "telefone": telefone,
+        "email": email,
+        "crm": crm,
+        "crm_estado": crm_estado,
+        "especialidade": especialidade,
         "senha": hashed,
         "tipo": tipo
-    })
+    }
 
-    return jsonify({"msg": "Usuário criado com sucesso"}), 201
+
+    return jsonify({"msg": "Médico cadastrado com sucesso"}), 201
+
 
 @usuario_bp.route("/register", methods=["POST"])
 def registrar_usuario():
@@ -93,6 +104,54 @@ def registrar_usuario():
 
     return jsonify({"msg": "Usuário criado com sucesso"}), 201
 
+@usuario_bp.route("/register-tecnico", methods=["POST"])
+@jwt_required()
+def registrar_tecnico():
+    identity = get_jwt_identity()
+    cpf_admin, tipo_usuario = identity.split(":")
+    if tipo_usuario != "admin":
+        return jsonify({"msg": "Apenas administradores podem cadastrar técnicos"}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "Requisição sem corpo JSON válido"}), 400
+
+    nome = data.get("nome", "").strip()
+    cpf = limpar_cpf(data.get("cpf", ""))
+    rg = limpar_rg(data.get("rg", ""))
+    data_nascimento = data.get("data_nascimento", "").strip()
+    telefone = data.get("telefone", "").strip()
+    email = data.get("email", "").strip()
+    senha = data.get("senha")
+    confirma_senha = data.get("confirma_senha")
+    tipo = data.get("tipo", "").strip()
+
+    if not nome or not cpf or not rg or not senha or not tipo:
+        return jsonify({"msg": "Nome, CPF, RG, senha e tipo são obrigatórios"}), 400
+
+    if senha != confirma_senha:
+        return jsonify({"msg": "As senhas não coincidem"}), 400
+
+    if usuario_collection.find_one({"cpf": cpf, "tipo": tipo}):
+        return jsonify({"msg": "CPF já registrado com esse tipo de acesso"}), 409
+
+    hashed = bcrypt.generate_password_hash(senha).decode("utf-8")
+
+    usuario_doc = {
+        "nome": nome,
+        "cpf": cpf,
+        "rg": rg,
+        "data_nascimento": data_nascimento,
+        "telefone": telefone,
+        "email": email,
+        "senha": hashed,
+        "tipo": tipo
+    }
+
+    usuario_collection.insert_one(usuario_doc)
+
+    return jsonify({"msg": "Técnico cadastrado com sucesso"}), 201
+
 
 @usuario_bp.route("/login", methods=["POST"])
 def login():
@@ -114,8 +173,11 @@ def login():
         redirect = "/cadastro-medico"
     elif usuario["tipo"] == "medico":
         redirect = "/dashboard-medico"
+    elif usuario["tipo"] == "tecnico":
+        redirect = "/painel-coleta"
     else:
         redirect = "/dashboard-usuario"
+
 
     return jsonify({
         "success": True,

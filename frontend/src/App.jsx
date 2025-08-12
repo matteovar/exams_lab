@@ -21,6 +21,7 @@ import RoleRoute from "./components/RoleRoute";
 import CadastroUsuario from "./components/Cadastro_usuario";
 import VerFicha from "./components/VerFicha";
 import CadastroMedico from "./components/CadastroMedico";
+import PainelColeta from "./components/PainelColeta";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -36,6 +37,7 @@ const AppWrapper = () => {
       "/agendar-exames",
       "/agenda",
       "/ver-ficha",
+      "/painel-coleta",
     ];
 
     const rotaSemHeader =
@@ -60,6 +62,14 @@ const AppWrapper = () => {
           element={
             <RoleRoute role="usuario">
               <AgendarExames />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/painel-coleta"
+          element={
+            <RoleRoute role="tecnico">
+              <PainelColeta />
             </RoleRoute>
           }
         />
