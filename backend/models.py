@@ -18,6 +18,35 @@ exame_collection = db["exames"]
 coleta_collection = db["coletas"]
 laudo_collection = db["laudos"]
 
+# Adicionar isso ao models.py, na parte de exames_iniciais
+padroes_laudo = {
+    "Hemograma": {
+        "campos": [
+            {"nome": "Hemoglobina", "unidade": "g/dL", "valor_referencia": "12-16"},
+            {"nome": "Hematócrito", "unidade": "%", "valor_referencia": "36-46"},
+            {"nome": "Leucócitos", "unidade": "células/mm³", "valor_referencia": "4000-11000"},
+            {"nome": "Plaquetas", "unidade": "células/mm³", "valor_referencia": "150000-450000"}
+        ],
+        "template": """Laudo Hematológico:
+- Hemoglobina: {Hemoglobina} g/dL (VR: 12-16)
+- Hematócrito: {Hematócrito}% (VR: 36-46)
+- Leucócitos: {Leucócitos} células/mm³ (VR: 4000-11000)
+- Plaquetas: {Plaquetas} células/mm³ (VR: 150000-450000)
+
+Conclusão: {conclusao}"""
+    },
+    "Glicemia": {
+        "campos": [
+            {"nome": "Glicemia", "unidade": "mg/dL", "valor_referencia": "70-99 (jejum)"}
+        ],
+        "template": """Laudo Glicêmico:
+- Glicemia: {Glicemia} mg/dL (VR: 70-99 em jejum)
+
+Conclusão: {conclusao}"""
+    }
+    # Adicionar outros exames conforme necessário
+}
+
 # Cadastro inicial de exames (pode ser feito via administração)
 exames_iniciais = [
     {

@@ -62,6 +62,34 @@ def criar_agendamento():
         }), 201
     except Exception as e:
         return jsonify({"msg": f"Erro ao criar agendamento: {str(e)}"}), 500
+    
+@agendamento_bp.route("/laudos-pendentes", methods=["GET"])
+@jwt_required()
+def listar_laudos_pendentes():
+    # Verificar se usuário é médico
+    user = usuario_collection.find_one(
+        {"cpf": get_jwt_identity().split(":")[0], "tipo": "medico"}
+    )
+    if not user:
+        return jsonify({"msg": "Acesso não autorizado"}), 403
+    
+    agendamentos = list(agendamento_collection.find(
+        {"status": "coletado"},
+        {"_id": 1, "cpf_usuario": 1, "data_coleta": 1, "exames": 1}
+    ).sort("data_coleta", 1))
+    
+    for ag in agendamentos:
+        ag["_id"] = str(ag["_id"])
+        ag["data_coleta"] = ag["data_coleta"].isoformat()
+        
+        # Adicionar info do paciente
+        paciente = usuario_collection.find_one(
+            {"cpf": ag["cpf_usuario"]},
+            {"nome": 1}
+        )
+        ag["paciente_nome"] = paciente.get("nome", "Não informado")
+    
+    return jsonify(agendamentos), 200
 
 @agendamento_bp.route("/meus-agendamentos", methods=["GET"])
 @jwt_required()

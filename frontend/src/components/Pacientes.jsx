@@ -15,14 +15,11 @@ const Pacientes = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("Token não encontrado. Faça login novamente.");
-        const response = await fetch(
-          "http://localhost:5000/api/medico/pacientes",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch("http://localhost:5000/api/medico/pacientes", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) throw new Error("Erro ao carregar pacientes");
         const data = await response.json();
         setPacientes(data);

@@ -117,7 +117,6 @@ def lista_medicos():
     except Exception as e:
         return jsonify({"msg": f"Erro ao buscar médicos: {str(e)}"}), 500
 
-# Adicione esta rota no medico.py
 @medico_bp.route("/fichas", methods=["POST"])
 @jwt_required()
 def salvar_ficha():
@@ -130,39 +129,65 @@ def salvar_ficha():
     data = request.get_json()
     
     try:
-        # Salvar a ficha
-        ficha_data = {
-            "pacienteId": data["pacienteId"],
-            "pacienteNome": data["pacienteNome"],
-            "exameNome": data["exameNome"],
-            "resultado": data["resultado"],
-            "observacoes": data["observacoes"],
-            "dataPreenchimento": data["dataPreenchimento"],
-            "medicoResponsavel": cpf_medico
-        }
+        # Validação dos dados
+        required_fields = ["agendamentoId", "pacienteId", "pacienteNome", "exames"]
+        if not all(field in data for field in required_fields):
+            return jsonify({"msg": "Dados incompletos"}), 400
         
-        # Inserir na coleção de fichas
-        ficha_id = ficha_collection.insert_one(ficha_data).inserted_id
+        if not isinstance(data["exames"], list) or len(data["exames"]) == 0:
+            return jsonify({"msg": "Nenhum exame fornecido"}), 400
+
+        fichas_ids = []
+        
+        # Salvar cada ficha de exame
+        for exame in data["exames"]:
+            if not exame.get("resultados") or not isinstance(exame["resultados"], dict):
+                return jsonify({"msg": "Resultados inválidos para o exame"}), 400
+                
+            if not exame.get("conclusao"):
+                return jsonify({"msg": "Conclusão é obrigatória para todos os exames"}), 400
+
+            ficha_data = {
+                "agendamento_id": ObjectId(data["agendamentoId"]),
+                "paciente_id": data["pacienteId"],
+                "paciente_nome": data["pacienteNome"],
+                "exame_nome": exame["nome"],
+                "resultados": exame["resultados"],
+                "observacoes": exame.get("observacoes", ""),
+                "conclusao": exame["conclusao"],
+                "laudo_completo": exame.get("laudoCompleto", ""),
+                "medico_responsavel": cpf_medico,
+                "data_preenchimento": datetime.utcnow(),
+                "status": "concluido"
+            }
+            
+            ficha_id = ficha_collection.insert_one(ficha_data).inserted_id
+            fichas_ids.append(str(ficha_id))
         
         # Atualizar status do agendamento para "concluído"
         agendamento_collection.update_one(
-            {
-                "cpf_usuario": data["pacienteId"],
-                "tipo_exame": data["exameNome"],
-                "status": "agendado"
-            },
+            {"_id": ObjectId(data["agendamentoId"])},
             {
                 "$set": {
-                    "status": "concluído",
-                    "ficha_id": str(ficha_id)
+                    "status": "concluido",
+                    "fichas_ids": fichas_ids,
+                    "etapas.laudo": {
+                        "realizada": True,
+                        "responsavel": cpf_medico,
+                        "data": datetime.utcnow()
+                    }
                 }
             }
         )
         
-        return jsonify({"msg": "Ficha salva com sucesso", "ficha_id": str(ficha_id)}), 201
+        return jsonify({
+            "msg": "Laudos salvos com sucesso",
+            "total_exames": len(data["exames"]),
+            "fichas_ids": fichas_ids
+        }), 201
         
     except Exception as e:
-        return jsonify({"msg": f"Erro ao salvar ficha: {str(e)}"}), 500
+        return jsonify({"msg": f"Erro ao salvar laudos: {str(e)}"}), 500
 
 # Adicionar esta rota para listar fichas
 @medico_bp.route("/fichas", methods=["GET"])
