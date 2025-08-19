@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import HeaderMedico from "./HeaderMedico";
-import { ArrowLeft, FileText, Calendar, User, ClipboardList, AlertCircle } from "lucide-react";
+import { CreditCard, Calendar, User } from "lucide-react";
 
 const PacienteDetalhes = () => {
   const { nome } = useParams();
@@ -36,16 +36,39 @@ const PacienteDetalhes = () => {
     fetchExamesPaciente();
   }, [nome]);
 
+  const calcularIdade = (dataNascimento) => {
+    if (!dataNascimento) return "Não informada";
+    
+    try {
+      const nascimento = new Date(dataNascimento);
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nascimento.getFullYear();
+      const mes = hoje.getMonth() - nascimento.getMonth();
+      
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+        idade--;
+      }
+      
+      return `${idade} anos`;
+    } catch {
+      return "Data inválida";
+    }
+  };
+
   const formatarData = (dataString) => {
     if (!dataString) return "Data não disponível";
-    const options = { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dataString).toLocaleDateString('pt-BR', options);
+    try {
+      const options = { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dataString).toLocaleDateString('pt-BR', options);
+    } catch {
+      return dataString;
+    }
   };
 
   const formatarResultados = (resultados) => {
@@ -85,7 +108,7 @@ const PacienteDetalhes = () => {
         <div className="p-8 bg-gray-100 min-h-screen">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center text-red-500">
-              <AlertCircle className="mr-2" />
+              <span className="mr-2">⚠️</span>
               <span>{error}</span>
             </div>
             <button
@@ -109,7 +132,7 @@ const PacienteDetalhes = () => {
             onClick={() => navigate(-1)}
             className="flex items-center text-blue-600 hover:text-blue-800 mb-6"
           >
-            <ArrowLeft className="mr-2" size={20} />
+            <span className="mr-2">←</span>
             Voltar para lista de pacientes
           </button>
 
@@ -118,19 +141,25 @@ const PacienteDetalhes = () => {
             <div className="bg-blue-600 text-white p-6">
               <div className="flex items-center">
                 <div className="bg-white/20 p-3 rounded-full mr-4">
-                  <User size={24} />
+                  <span className="text-white">👤</span>
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold">{nome}</h1>
                   <div className="flex flex-wrap gap-4 mt-2 text-sm">
                     <div className="flex items-center">
-                      <Calendar className="mr-1" size={16} />
-                      <span>Idade: {dados?.paciente?.idade || "Não informada"}</span>
+                      <span className="mr-1">📅</span>
+                      <span>Idade: {calcularIdade(dados?.paciente?.data_nascimento)}</span>
                     </div>
                     <div className="flex items-center">
-                      <ClipboardList className="mr-1" size={16} />
+                      <span className="mr-1">📋</span>
                       <span>Total de exames: {dados?.fichas?.length || 0}</span>
                     </div>
+                    {dados?.paciente?.nome_convenio && (
+                      <div className="flex items-center">
+                        <span className="mr-1">🏥</span>
+                        <span>Convênio: {dados.paciente.nome_convenio}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -143,14 +172,14 @@ const PacienteDetalhes = () => {
                   onClick={() => setActiveTab("fichas")}
                   className={`px-6 py-4 font-medium text-sm flex items-center ${activeTab === "fichas" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"}`}
                 >
-                  <FileText className="mr-2" size={16} />
+                  <span className="mr-2">📄</span>
                   Fichas de Exames
                 </button>
                 <button
                   onClick={() => setActiveTab("info")}
                   className={`px-6 py-4 font-medium text-sm flex items-center ${activeTab === "info" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"}`}
                 >
-                  <User className="mr-2" size={16} />
+                  <span className="mr-2">ℹ️</span>
                   Informações
                 </button>
               </nav>
@@ -159,34 +188,94 @@ const PacienteDetalhes = () => {
             {/* Conteúdo das abas */}
             <div className="p-6">
               {activeTab === "info" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 p-5 rounded-lg">
-                    <h2 className="font-semibold text-lg mb-4">Dados Pessoais</h2>
-                    <div className="space-y-3">
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="text-gray-600">Idade:</span>
-                        <span>{dados?.paciente?.idade || "Não informada"}</span>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 p-5 rounded-lg">
+                      <h2 className="font-semibold text-lg mb-4">Dados Pessoais</h2>
+                      <div className="space-y-3">
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-gray-600">Data de Nascimento:</span>
+                          <span>
+                            {dados?.paciente?.data_nascimento 
+                              ? new Date(dados.paciente.data_nascimento).toLocaleDateString('pt-BR') 
+                              : "Não informada"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-gray-600">Idade:</span>
+                          <span>{calcularIdade(dados?.paciente?.data_nascimento)}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-gray-600">CPF:</span>
+                          <span>{dados?.paciente?.cpf || "Não informado"}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-gray-600">Telefone:</span>
+                          <span>{dados?.paciente?.telefone || "Não informado"}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-gray-600">Email:</span>
+                          <span>{dados?.paciente?.email || "Não informado"}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="text-gray-600">Contato:</span>
-                        <span>{dados?.paciente?.contato || "Não informado"}</span>
+                    </div>
+
+                    <div className="bg-gray-50 p-5 rounded-lg">
+                      <h2 className="font-semibold text-lg mb-4">Histórico Médico</h2>
+                      <div className="space-y-3">
+                        <div className="border-b pb-2">
+                          <h4 className="text-gray-600 mb-1">Problemas de saúde:</h4>
+                          <p className="whitespace-pre-line">
+                            {dados?.paciente?.problemas_saude || "Não informado"}
+                          </p>
+                        </div>
+                        <div className="border-b pb-2">
+                          <h4 className="text-gray-600 mb-1">Medicações em uso:</h4>
+                          <p className="whitespace-pre-line">
+                            {dados?.paciente?.medicacoes || "Não informado"}
+                          </p>
+                        </div>
+                        <div className="border-b pb-2">
+                          <h4 className="text-gray-600 mb-1">Endereço:</h4>
+                          <p className="whitespace-pre-line">
+                            {dados?.paciente?.endereco || "Não informado"}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 p-5 rounded-lg">
-                    <h2 className="font-semibold text-lg mb-4">Histórico Médico</h2>
-                    <div className="space-y-3">
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="text-gray-600">Problemas de saúde:</span>
-                        <span>{dados?.paciente?.problema_de_saude || "Não informado"}</span>
-                      </div>
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="text-gray-600">Medicações:</span>
-                        <span>{dados?.paciente?.medicacoes || "Não informado"}</span>
+                  {/* Seção Convênio Médico */}
+                  {dados?.paciente?.nome_convenio && (
+                    <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                      <h2 className="font-semibold text-lg mb-4 flex items-center">
+                        <CreditCard className="w-5 h-5 mr-2 text-blue-600" />
+                        Informações do Convênio
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">Plano de Saúde</h4>
+                          <p className="text-gray-900">{dados.paciente.nome_convenio}</p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">Número da Carteirinha</h4>
+                          <p className="text-gray-900">{dados.paciente.numero_carteirinha}</p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">Validade</h4>
+                          <p className="text-gray-900">
+                            {dados.paciente.validade_carteirinha 
+                              ? new Date(dados.paciente.validade_carteirinha).toLocaleDateString('pt-BR') 
+                              : "Não informada"}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">Tipo de Plano</h4>
+                          <p className="text-gray-900">{dados.paciente.plano}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <div>
@@ -200,7 +289,7 @@ const PacienteDetalhes = () => {
                             <div>
                               <h3 className="font-medium text-lg">{ficha.exame_nome}</h3>
                               <p className="text-sm text-gray-500 flex items-center">
-                                <Calendar className="mr-1" size={14} />
+                                <span className="mr-1">📅</span>
                                 {formatarData(ficha.data_preenchimento)}
                               </p>
                             </div>
@@ -245,7 +334,7 @@ const PacienteDetalhes = () => {
                     </div>
                   ) : (
                     <div className="text-center py-10 bg-gray-50 rounded-lg">
-                      <FileText className="mx-auto text-gray-400" size={40} />
+                      <span className="mx-auto text-gray-400 text-4xl">📄</span>
                       <p className="mt-3 text-gray-500">Nenhum exame registrado para este paciente.</p>
                     </div>
                   )}

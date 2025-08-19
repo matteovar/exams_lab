@@ -1,8 +1,7 @@
 import datetime
 from collections import defaultdict
 from bson import ObjectId
-
-
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import medico_collection, usuario_collection, ficha_collection, agendamento_collection
@@ -35,7 +34,7 @@ def get_pacientes():
     if tipo != "medico":
         return jsonify({"msg": "Apenas médicos podem acessar esta rota"}), 403
 
-    pacientes = usuario_collection.find({"tipo": "usuario"})
+    pacientes = usuario_collection.find({"tipo": "usuario"}, {"nome": 1, "_id": 0})
     nomes = [paciente["nome"] for paciente in pacientes]
     return jsonify(nomes), 200
 
@@ -69,25 +68,38 @@ def add_paciente():
 def get_paciente_por_nome(nome):
     identity = get_jwt_identity()
     cpf, tipo = identity.split(":")
-
+    
     if tipo != "medico":
         return jsonify({"msg": "Apenas médicos podem acessar esta rota"}), 403
 
-    paciente = usuario_collection.find_one({"nome": nome})
+    paciente = usuario_collection.find_one({"nome": nome, "tipo": "usuario"})
     if not paciente:
         return jsonify({"msg": "Paciente não encontrado"}), 404
 
     fichas = list(ficha_collection.find({"pacienteNome": nome}))
     for ficha in fichas:
         ficha["_id"] = str(ficha["_id"])
+        if "data_preenchimento" in ficha and isinstance(ficha["data_preenchimento"], datetime):
+            ficha["data_preenchimento"] = ficha["data_preenchimento"].isoformat()
+
+    # Remover campos sensíveis
+    paciente_data = {
+        "nome": paciente.get("nome"),
+        "cpf": paciente.get("cpf"),
+        "data_nascimento": paciente.get("data_nascimento"),
+        "telefone": paciente.get("telefone"),
+        "email": paciente.get("email"),
+        "problemas_saude": paciente.get("problemas_saude"),
+        "medicacoes": paciente.get("medicacoes"),
+        "endereco": paciente.get("endereco"),
+        "nome_convenio": paciente.get("convenio", {}).get("nome_convenio"),
+        "numero_carteirinha": paciente.get("convenio", {}).get("numero_carteirinha"),
+        "validade_carteirinha": paciente.get("convenio", {}).get("validade_carteirinha"),
+        "plano": paciente.get("convenio", {}).get("plano")
+    }
 
     return jsonify({
-        "paciente": {
-            "nome": paciente.get("nome"),
-            "idade": paciente.get("idade"),
-            "contato": paciente.get("contato"),
-            "problema_de_saude": paciente.get("problema_de_saude")
-        },
+        "paciente": paciente_data,
         "fichas": fichas
     }), 200
 
@@ -156,7 +168,7 @@ def salvar_ficha():
                 "observacoes": exame.get("observacoes", ""),
                 "conclusao": exame["conclusao"],
                 "laudo_completo": exame.get("laudoCompleto", ""),
-                "medico_responsavel": cpf_medico,
+                "medicoResponsavel": cpf_medico,
                 "data_preenchimento": datetime.utcnow(),
                 "status": "concluido"
             }
@@ -237,3 +249,24 @@ def editar_ficha(ficha_id):
         
     except Exception as e:
         return jsonify({"msg": f"Erro ao editar ficha: {str(e)}"}), 500
+    
+@medico_bp.route("/resultados-paciente", methods=["GET"])
+@jwt_required()
+def resultados_paciente():
+    identity = get_jwt_identity()
+    cpf_paciente, tipo = identity.split(":")
+    
+    if tipo != "usuario":
+        return jsonify({"msg": "Apenas pacientes podem acessar esta rota"}), 403
+    
+    fichas = list(ficha_collection.find({"paciente_id": cpf_paciente}))
+    
+    # Converter todos os ObjectId para string e tratar campos datetime
+    for ficha in fichas:
+        ficha["_id"] = str(ficha["_id"])
+        if "agendamento_id" in ficha:
+            ficha["agendamento_id"] = str(ficha["agendamento_id"])
+        if "data_preenchimento" in ficha:
+            ficha["data_preenchimento"] = ficha["data_preenchimento"].isoformat()
+    
+    return jsonify(fichas), 200

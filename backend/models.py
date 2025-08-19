@@ -44,10 +44,9 @@ Conclusão: {conclusao}"""
 
 Conclusão: {conclusao}"""
     }
-    # Adicionar outros exames conforme necessário
+    
 }
 
-# Cadastro inicial de exames (pode ser feito via administração)
 exames_iniciais = [
     {
         "nome": "Hemograma",

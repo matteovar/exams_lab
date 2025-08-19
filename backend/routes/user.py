@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from models import usuario_collection
+from datetime import datetime
 
 usuario_bp = Blueprint("usuario", __name__)
 bcrypt = Bcrypt()
@@ -69,40 +70,100 @@ def registrar_medico():
 
 @usuario_bp.route("/register", methods=["POST"])
 def registrar_usuario():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    if not data:
-        return jsonify({"msg": "Requisição sem corpo JSON válido"}), 400
+        if not data:
+            return jsonify({"success": False, "msg": "Requisição sem corpo JSON válido"}), 400
 
-    nome = data.get("nome")
-    cpf = limpar_cpf(data.get("cpf", ""))
-    email = data.get("email", "").strip()
-    telefone = data.get("telefone", "").strip()
-    senha = data.get("senha")
-    confirma_senha = data.get("confirma_senha")
-    tipo = data.get("tipo")
+        # Campos obrigatórios
+        required_fields = ["nome", "cpf", "senha", "confirma_senha", "tipo", "data_nascimento"]
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        
+        if missing_fields:
+            return jsonify({
+                "success": False,
+                "msg": f"Campos obrigatórios faltando: {', '.join(missing_fields)}"
+            }), 400
 
-    if not nome or not cpf or not senha or not tipo:
-        return jsonify({"msg": "Nome, CPF, senha e tipo são obrigatórios"}), 400
+        # Validações
+        cpf = limpar_cpf(data["cpf"])
+        if len(cpf) != 11 or not cpf.isdigit():
+            return jsonify({"success": False, "msg": "CPF inválido"}), 400
 
-    if senha != confirma_senha:
-        return jsonify({"msg": "As senhas não coincidem"}), 400
+        if data["senha"] != data["confirma_senha"]:
+            return jsonify({"success": False, "msg": "As senhas não coincidem"}), 400
 
-    if usuario_collection.find_one({"cpf": cpf, "tipo": tipo}):
-        return jsonify({"msg": "CPF já registrado com esse tipo de acesso"}), 409
+        if len(data["senha"]) < 6:
+            return jsonify({
+                "success": False,
+                "msg": "A senha deve ter pelo menos 6 caracteres"
+            }), 400
 
-    hashed = bcrypt.generate_password_hash(senha).decode("utf-8")
+        # Verifica se usuário já existe
+        if usuario_collection.find_one({"cpf": cpf, "tipo": data["tipo"]}):
+            return jsonify({
+                "success": False,
+                "msg": "CPF já registrado para este tipo de usuário"
+            }), 409
 
-    usuario_collection.insert_one({
-        "nome": nome,
-        "cpf": cpf,
-        "email": email,
-        "telefone": telefone,
-        "senha": hashed,
-        "tipo": tipo
-    })
+        # Validação de data de nascimento
+        try:
+            nascimento = datetime.strptime(data["data_nascimento"], "%Y-%m-%d")
+            if nascimento > datetime.now():
+                return jsonify({
+                    "success": False,
+                    "msg": "Data de nascimento inválida"
+                }), 400
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "msg": "Formato de data inválido. Use YYYY-MM-DD"
+            }), 400
 
-    return jsonify({"msg": "Usuário criado com sucesso"}), 201
+        # Cria documento do usuário
+        hashed = bcrypt.generate_password_hash(data["senha"]).decode("utf-8")
+        
+        convenio_info = {
+            "possui_convenio": data.get("possui_convenio", False),
+            "nome_convenio": data.get("nome_convenio", "").strip(),
+            "numero_carteirinha": data.get("numero_carteirinha", "").strip(),
+            "validade_carteirinha": data.get("validade_carteirinha", ""),
+            "plano": data.get("plano", "").strip()
+        } if data.get("possui_convenio") else None
+
+        usuario_doc = {
+            "nome": data["nome"].strip(),
+            "cpf": cpf,
+            "email": data.get("email", "").strip().lower(),
+            "telefone": data.get("telefone", "").strip(),
+            "senha": hashed,
+            "data_nascimento": data["data_nascimento"],
+            "problemas_saude": data.get("problemas_saude", "").strip(),
+            "medicacoes": data.get("medicacoes", "").strip(),
+            "endereco": data.get("endereco", "").strip(),
+            "convenio": convenio_info,
+            "data_cadastro": datetime.utcnow(),
+            "ativo": True,
+            "tipo": data["tipo"],
+        }
+
+        # Insere no banco de dados
+        result = usuario_collection.insert_one(usuario_doc)
+        
+        return jsonify({
+            "success": True,
+            "msg": "Usuário criado com sucesso",
+            "user_id": str(result.inserted_id)
+        }), 201
+
+    except Exception as e:
+        print(f"Erro no registro: {str(e)}")
+        return jsonify({
+            "success": False,
+            "msg": "Erro interno no servidor"
+        }), 500
+    
 
 @usuario_bp.route("/register-tecnico", methods=["POST"])
 @jwt_required()
