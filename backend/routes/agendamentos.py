@@ -45,7 +45,6 @@ def criar_agendamento():
         "data_coleta": datetime.fromisoformat(data["data_coleta"]),
         "status": "agendado",
         "local_coleta": data.get("local_coleta", "Sede Principal"),
-        "observacoes": data.get("observacoes", ""),
         "data_criacao": datetime.utcnow(),
         "etapas": {
             "coleta": {"realizada": False, "responsavel": None, "data": None},
@@ -157,7 +156,6 @@ def registrar_coleta(agendamento_id):
         "tecnico_responsavel": user["cpf"],
         "data_coleta": datetime.utcnow(),
         "amostras": data["amostras"],
-        "observacoes": data.get("observacoes", "")
     }
     
     try:
@@ -182,5 +180,3 @@ def registrar_coleta(agendamento_id):
         return jsonify({"msg": "Coleta registrada com sucesso"}), 200
     except Exception as e:
         return jsonify({"msg": f"Erro ao registrar coleta: {str(e)}"}), 500
-
-# ... (adicionar endpoints para análise e laudo)

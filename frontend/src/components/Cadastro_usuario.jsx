@@ -116,9 +116,8 @@ const CadastroUsuario = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
-            <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-xl mb-16">
-                <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">Crie sua conta</h2>
+        <div className="flex items-center  justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
+            <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-xl mb-16 overflow-y-auto max-h-[90vh]">                <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">Crie sua conta</h2>
 
                 <form onSubmit={handleCadastro}>
                     {msg && (

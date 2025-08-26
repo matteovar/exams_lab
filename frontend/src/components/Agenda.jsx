@@ -30,7 +30,7 @@ const Agenda = () => {
       setLoading(true);
       setError("");
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/laudo/pendentes", {
+      const response = await fetch("http://localhost:5000/api/agendamento/laudos-pendentes", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -56,7 +56,7 @@ const Agenda = () => {
   return (
     <>
       <HeaderMedico />
-      <div className="p-8 bg-gray-100 min-h-screen">
+      <div className="p-6 max-w-6xl mx-auto max-h-[80vh] overflow-y-auto">
         <h1 className="text-3xl font-bold mb-6">Agenda - Exames Coletados</h1>
 
         {loading ? (
@@ -66,67 +66,68 @@ const Agenda = () => {
         ) : agenda.length === 0 ? (
           <p>Nenhum exame coletado pendente de resultado.</p>
         ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <table className="w-full table-auto">
-              <thead className="bg-blue-600 text-white">
-                <tr>
-                  <th className="px-4 py-2 text-left">Paciente (CPF)</th>
-                  <th className="px-4 py-2 text-center">Exames</th>
-                  <th className="px-4 py-2 text-center">Detalhes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agenda.map((item) => (
-                  <React.Fragment key={item._id}>
-                    <tr className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{item.cpf_usuario}</td>
-                      <td className="px-4 py-3 text-center">
-                        {item.exames.map((ex) => ex.nome).join(", ")}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => toggleExpand(item._id)}
-                          className="transition-transform"
-                        >
-                          {expanded === item._id ? (
-                            <ChevronUp className="w-6 h-6 text-blue-600" />
-                          ) : (
-                            <ChevronDown className="w-6 h-6 text-blue-600" />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-
-                    {expanded === item._id && (
-                      <tr className="bg-gray-50">
-                        <td colSpan="3" className="px-6 py-4">
-                          <h3 className="font-semibold mb-2">Exames Pendentes:</h3>
-                          <ul className="list-disc pl-5">
-                            {item.exames.map((ex, idx) => (
-                              <li key={idx}>{ex.nome}</li>
-                            ))}
-                          </ul>
-
-                          <button
-                            onClick={() =>
-                              abrirFicha(
-                                item._id,
-                                item.cpf_usuario,
-                                item.cpf_usuario,
-                                item.exames
-                              )
-                            }
-                            className="mt-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                          >
-                            Preencher Resultado
-                          </button>
-                        </td>
-                      </tr>
+          <div className="space-y-4">
+            {agenda.map((item) => (
+              <div
+                key={item._id}
+                className="bg-white shadow-md rounded-xl p-5 border border-gray-200"
+              >
+                {/* Cabeçalho do paciente */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-800">
+                      Paciente: {item.paciente_nome}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      CPF: {item.cpf_usuario}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Exames: {item.exames.length}
+                    </p>
+                  </div>
+                  <button onClick={() => toggleExpand(item._id)}>
+                    {expanded === item._id ? (
+                      <ChevronUp className="w-6 h-6 text-blue-600" />
+                    ) : (
+                      <ChevronDown className="w-6 h-6 text-blue-600" />
                     )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+                  </button>
+                </div>
+
+                {/* Conteúdo expandido */}
+                {expanded === item._id && (
+                  <div className="mt-4 animate-fadeIn">
+                    <h3 className="font-semibold text-gray-700 mb-2">
+                      Exames Pendentes:
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {item.exames.map((ex, idx) => (
+                        <span
+                          key={idx}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium flex items-center gap-1"
+                        >
+                          {ex.nome}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        abrirFicha(
+                          item._id,
+                          item.cpf_usuario,      // CPF
+                          item.paciente_nome,    // Nome
+                          item.exames
+                        )
+                      }
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
+                    >
+                      Preencher Resultado
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

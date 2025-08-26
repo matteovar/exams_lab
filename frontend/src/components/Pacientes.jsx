@@ -39,7 +39,7 @@ const Pacientes = () => {
   return (
     <>
       <HeaderMedico />
-      <div className="p-8 bg-gray-100 min-h-screen">
+      <div className="p-6 max-w-6xl mx-auto max-h-[80vh] overflow-y-auto"> 
         <h1 className="text-3xl font-bold mb-6">Pacientes</h1>
         <div className="mb-6 flex flex-col md:flex-row gap-4">
           <div className="relative flex-grow">

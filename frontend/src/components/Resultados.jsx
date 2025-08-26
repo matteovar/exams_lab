@@ -5,8 +5,9 @@ const Resultados = () => {
   const [resultados, setResultados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [groupedResults, setGroupedResults] = useState({});
-  const [expandedExams, setExpandedExams] = useState({});
+  const [selectedExam, setSelectedExam] = useState(null);
+  const [showPdf, setShowPdf] = useState(false);
+  const [pdfDia, setPdfDia] = useState(null);
 
   useEffect(() => {
     const fetchResultados = async () => {
@@ -24,25 +25,6 @@ const Resultados = () => {
 
         const data = await response.json();
         setResultados(data);
-        
-        // Agrupa os resultados por data
-        const grouped = data.reduce((acc, result) => {
-          const date = new Date(result.data_preenchimento).toLocaleDateString('pt-BR');
-          if (!acc[date]) {
-            acc[date] = [];
-          }
-          acc[date].push(result);
-          return acc;
-        }, {});
-        
-        setGroupedResults(grouped);
-        
-        // Inicializa todos os exames como recolhidos
-        const initialExpandedState = {};
-        data.forEach(exam => {
-          initialExpandedState[exam._id] = false;
-        });
-        setExpandedExams(initialExpandedState);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -53,124 +35,129 @@ const Resultados = () => {
     fetchResultados();
   }, []);
 
-  const toggleExpand = (examId) => {
-    setExpandedExams(prev => ({
-      ...prev,
-      [examId]: !prev[examId]
-    }));
+  // Agrupa exames por data (dia)
+  const examesPorDia = {};
+  resultados.forEach((ficha) => {
+    const dia = ficha.data_preenchimento
+      ? new Date(ficha.data_preenchimento).toLocaleDateString("pt-BR")
+      : "Sem data";
+    if (!examesPorDia[dia]) examesPorDia[dia] = [];
+    if (ficha.exames && ficha.exames.length > 0) {
+      ficha.exames.forEach((exam) => {
+        examesPorDia[dia].push({ ...exam, ficha });
+      });
+    }
+  });
+
+  // Função para abrir o PDF do dia
+  const handlePdfDia = (dia) => {
+    setPdfDia(dia);
+    setShowPdf(true);
   };
 
   return (
     <>
       <HeaderUsuario />
-      <div className="p-4 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">Resultados dos Exames</h1>
-        <p className="text-lg text-gray-700 mb-6">
-          Aqui você pode visualizar todos os resultados dos seus exames. Clique em um exame para ver os detalhes.
-        </p>
-
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-lg">Carregando resultados...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-            <p className="font-bold">Erro</p>
-            <p>{error}</p>
-          </div>
-        ) : resultados.length === 0 ? (
-          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4">
+      <div className="pt-10 pb-28 max-w-7xl mx-auto h-screen flex">
+        {/* Lista lateral agrupada por dia */}
+        <div className="w-1/3 pr-6 border-r overflow-y-auto">
+          <h1 className="text-2xl font-bold mb-4">Resultado de Exames</h1>
+          {loading ? (
+            <p>Carregando...</p>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : Object.keys(examesPorDia).length === 0 ? (
             <p>Você ainda não possui resultados disponíveis.</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(groupedResults).map(([date, exams]) => (
-              <div key={date} className="border rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-gray-50 px-4 py-3 border-b">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    Exames realizados em {date}
-                  </h2>
-                </div>
-                
-                <div className="divide-y divide-gray-100">
-                  {exams.map((res) => (
-                    <div key={res._id} className="hover:bg-gray-50 transition-colors">
-                      <button
-                        onClick={() => toggleExpand(res._id)}
-                        className="w-full text-left p-4 flex justify-between items-center focus:outline-none"
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(examesPorDia).map(([dia, exames]) => (
+                <div key={dia} className="border rounded-lg shadow-sm overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b flex items-center justify-between">
+                    <h2 className="font-semibold text-gray-800">{dia}</h2>
+                    <button
+                      className="ml-2 px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                      onClick={() => handlePdfDia(dia)}
+                    >
+                      PDF do Dia
+                    </button>
+                  </div>
+                  <div className="divide-y">
+                    {exames.map((exam, idx) => (
+                      <div
+                        key={exam.ficha._id + "_" + idx}
+                        onClick={() => setSelectedExam(exam)}
+                        className={`p-4 cursor-pointer hover:bg-gray-50 ${selectedExam?.ficha?._id === exam.ficha._id && selectedExam.nome === exam.nome
+                          ? "bg-blue-50"
+                          : "bg-white"
+                          }`}
                       >
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-3 h-3 rounded-full ${expandedExams[res._id] ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-                          <div>
-                            <h3 className="font-medium text-gray-900">
-                              {res.exame_nome}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              {new Date(res.data_preenchimento).toLocaleTimeString('pt-BR')}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mr-2">
-                            Concluído
-                          </span>
-                          {expandedExams[res._id] ? (
-                            <span className="text-gray-500">▲</span>  // Seta para cima Unicode
-                          ) : (
-                            <span className="text-gray-500">▼</span>  // Seta para baixo Unicode
-                          )}
-                        </div>
-                      </button>
-
-                      {/* Conteúdo expansível */}
-                      <div className={`transition-all duration-300 overflow-hidden ${expandedExams[res._id] ? 'max-h-[1000px]' : 'max-h-0'}`}>
-                        <div className="p-4 pt-0 space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <h4 className="font-medium mb-3 text-gray-700 border-b pb-2">
-                                Resultados
-                              </h4>
-                              <ul className="space-y-2">
-                                {res.resultados && Object.entries(res.resultados).map(([key, value]) => (
-                                  <li key={key} className="flex justify-between">
-                                    <span className="text-gray-600">{key}:</span>
-                                    <span className="font-medium">{value}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <h4 className="font-medium mb-3 text-gray-700 border-b pb-2">
-                                Laudo Médico
-                              </h4>
-                              <div className="whitespace-pre-line text-sm">
-                                {res.laudo_completo}
-                              </div>
-                            </div>
-                          </div>
-
-                          {res.observacoes && res.observacoes !== "N/A" && (
-                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r">
-                              <h4 className="font-medium text-yellow-800">Observações:</h4>
-                              <p className="text-sm text-yellow-700 mt-1">{res.observacoes}</p>
-                            </div>
-                          )}
-
-                          <div className="bg-green-50 border-l-4 border-green-400 p-3 rounded-r">
-                            <h4 className="font-medium text-green-800">Conclusão:</h4>
-                            <p className="font-semibold text-green-700 mt-1">{res.conclusao}</p>
-                          </div>
-                        </div>
+                        <h3 className="font-semibold">{exam.nome}</h3>
+                        <p className="text-sm text-gray-500">
+                          {exam.ficha.data_preenchimento
+                            ? new Date(exam.ficha.data_preenchimento).toLocaleTimeString("pt-BR")
+                            : ""}
+                        </p>
+                        <button className="mt-2 text-sm px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                          Compartilhar
+                        </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Detalhes do exame */}
+        <div className="w-2/3 pl-6 overflow-y-auto">
+          {selectedExam ? (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center border-b pb-2">
+                <h2 className="text-xl font-bold">{selectedExam.nome}</h2>
+                <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full">
+                  Concluído
+                </span>
               </div>
-            ))}
-          </div>
-        )}
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Resultados</h3>
+                <ul className="space-y-1">
+                  {selectedExam.resultados &&
+                    Object.entries(selectedExam.resultados).map(([key, value]) => (
+                      <li key={key} className="flex justify-between border-b py-1">
+                        <span className="text-gray-600">{key}</span>
+                        <span className="font-medium">{value}</span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Laudo Médico</h3>
+                <p className="whitespace-pre-line text-sm text-gray-800">
+                  {selectedExam.laudo_completo}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500">Selecione um exame à esquerda para ver os detalhes</p>
+          )}
+        </div>
       </div>
+
+      {/* Modal PDF do dia */}
+      {showPdf && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded shadow-lg max-w-3xl w-full">
+            <button className="mb-2 text-red-600" onClick={() => setShowPdf(false)}>Fechar</button>
+            <iframe
+              src={`http://localhost:5000/api/medico/pdf-dia?data=${encodeURIComponent(pdfDia)}&access_token=${localStorage.getItem("token")}`}
+              title="PDF do Dia"
+              width="100%"
+              height="600px"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };
