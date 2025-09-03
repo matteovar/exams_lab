@@ -33,8 +33,26 @@ const Pacientes = () => {
   }, []);
 
   const filteredPacientes = pacientes.filter((paciente) =>
-    paciente.toLowerCase().includes(searchTerm.toLowerCase())
+    paciente.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Função para formatar CPF
+  const formatarCPF = (cpf) => {
+    if (!cpf) return "Não informado";
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  };
+
+  // Função para formatar telefone
+  const formatarTelefone = (telefone) => {
+    if (!telefone) return "Não informado";
+    const cleaned = telefone.replace(/\D/g, "");
+    if (cleaned.length === 11) {
+      return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    } else if (cleaned.length === 10) {
+      return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+    return telefone;
+  };
 
   return (
     <>
@@ -65,19 +83,27 @@ const Pacientes = () => {
               <thead className="bg-blue-600 text-white">
                 <tr>
                   <th className="px-4 py-2 text-left">Paciente</th>
+                  <th className="px-4 py-2 text-left">CPF</th>
+                  <th className="px-4 py-2 text-left">Telefone</th>
+                  <th className="px-4 py-2 text-left">Email</th>
                   <th className="px-4 py-2 text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPacientes.map((paciente, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{paciente}</td>
+                {filteredPacientes.map((paciente) => (
+                  <tr key={paciente._id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium">{paciente.nome}</td>
+                    <td className="px-4 py-3">{formatarCPF(paciente.cpf)}</td>
+                    <td className="px-4 py-3">{formatarTelefone(paciente.telefone)}</td>
+                    <td className="px-4 py-3">{paciente.email || "Não informado"}</td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() =>
-                          navigate(`/pacientes/${encodeURIComponent(paciente)}`)
+                          navigate(`/pacientes/${encodeURIComponent(paciente.nome)}`, {
+                            state: { pacienteId: paciente.cpf, pacienteData: paciente }
+                          })
                         }
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline px-3 py-1 bg-blue-100 rounded hover:bg-blue-200 transition"
                       >
                         Ver detalhes
                       </button>
@@ -86,6 +112,18 @@ const Pacientes = () => {
                 ))}
               </tbody>
             </table>
+            
+            {filteredPacientes.length === 0 && pacientes.length > 0 && (
+              <div className="text-center py-8 text-gray-500">
+                Nenhum paciente encontrado com o termo "{searchTerm}"
+              </div>
+            )}
+            
+            {pacientes.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                Nenhum paciente cadastrado
+              </div>
+            )}
           </div>
         )}
       </div>

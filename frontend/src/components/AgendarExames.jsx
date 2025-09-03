@@ -5,13 +5,16 @@ import { Check, Clock, Calendar as CalendarIcon, AlertCircle, Loader2, X } from 
 
 const AgendarExames = () => {
   const [examesDisponiveis, setExamesDisponiveis] = useState([]);
-  const [filtro, setFiltro] = useState(""); // Estado para filtro de busca
+  const [filtro, setFiltro] = useState("");
   const [examesSelecionados, setExamesSelecionados] = useState([]);
   const [dataExame, setDataExame] = useState("");
   const [horario, setHorario] = useState("");
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
+  const [horariosOcupados, setHorariosOcupados] = useState([]);
   const [loading, setLoading] = useState({
     exames: true,
-    agendamento: false
+    agendamento: false,
+    horarios: false
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -57,7 +60,48 @@ const AgendarExames = () => {
     fetchExames();
   }, []);
 
-  // Filtra exames pelo nome, ignorando maiúsculas/minúsculas
+  // Verificar horários disponíveis quando a data mudar
+  useEffect(() => {
+    const verificarHorarios = async () => {
+      if (!dataExame || examesSelecionados.length === 0) {
+        setHorariosDisponiveis([]);
+        setHorariosOcupados([]);
+        return;
+      }
+
+      setLoading(prev => ({ ...prev, horarios: true }));
+      try {
+        const response = await fetch("http://localhost:5000/api/agendamento/verificar-horarios", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: dataExame,
+            exames: examesSelecionados.map(e => e.codigo)
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setHorariosDisponiveis(data.disponiveis || []);
+          setHorariosOcupados(data.ocupados || []);
+        } else {
+          throw new Error("Erro ao verificar horários");
+        }
+      } catch (err) {
+        console.error("Erro ao verificar horários:", err);
+        setHorariosDisponiveis([]);
+        setHorariosOcupados([]);
+      } finally {
+        setLoading(prev => ({ ...prev, horarios: false }));
+      }
+    };
+
+    verificarHorarios();
+  }, [dataExame, examesSelecionados]);
+
+  // Filtra exames pelo nome
   const examesFiltrados = examesDisponiveis.filter(exame =>
     exame.nome.toLowerCase().includes(filtro.toLowerCase())
   );
@@ -85,9 +129,11 @@ const AgendarExames = () => {
     setExamesSelecionados([]);
     setDataExame("");
     setHorario("");
+    setHorariosDisponiveis([]);
+    setHorariosOcupados([]);
     setRequisitos(null);
     setError("");
-    setFiltro(""); // Limpa também o filtro
+    setFiltro("");
   };
 
   // Submeter agendamento
@@ -105,6 +151,13 @@ const AgendarExames = () => {
 
     if (!dataExame || !horario) {
       setError("Selecione data e horário");
+      setLoading(prev => ({ ...prev, agendamento: false }));
+      return;
+    }
+
+    // Verificar se o horário ainda está disponível
+    if (!horariosDisponiveis.includes(horario)) {
+      setError("Este horário não está mais disponível. Por favor, escolha outro.");
       setLoading(prev => ({ ...prev, agendamento: false }));
       return;
     }
@@ -134,7 +187,6 @@ const AgendarExames = () => {
       setSuccess(true);
       limparFormulario();
       
-      // Redirecionar após 3 segundos
       setTimeout(() => {
         navigate("/dashboard-usuario");
       }, 3000);
@@ -233,7 +285,6 @@ const AgendarExames = () => {
                     </span>
                   </div>
                   
-                  {/* Área com scroll para os exames selecionados */}
                   <div className="max-h-96 overflow-y-auto pr-2 mb-6">
                     <div className="space-y-3">
                       {examesSelecionados.map((exame) => (
@@ -294,7 +345,10 @@ const AgendarExames = () => {
                           <input
                             type="date"
                             value={dataExame}
-                            onChange={(e) => setDataExame(e.target.value)}
+                            onChange={(e) => {
+                              setDataExame(e.target.value);
+                              setHorario(""); // Resetar horário quando mudar a data
+                            }}
                             min={hoje}
                             required
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-12 text-gray-700"
@@ -309,17 +363,36 @@ const AgendarExames = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Horário
                         </label>
-                        <select
-                          value={horario}
-                          onChange={(e) => setHorario(e.target.value)}
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
-                        >
-                          <option value="">Selecione um horário</option>
-                          {["07:00", "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"].map((hora) => (
-                            <option key={hora} value={hora}>{hora}</option>
-                          ))}
-                        </select>
+                        {loading.horarios ? (
+                          <div className="flex items-center justify-center h-12 border border-gray-300 rounded-lg">
+                            <Loader2 className="animate-spin h-5 w-5 text-blue-500 mr-2" />
+                            <span className="text-sm text-gray-600">Carregando horários...</span>
+                          </div>
+                        ) : (
+                          <select
+                            value={horario}
+                            onChange={(e) => setHorario(e.target.value)}
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                          >
+                            <option value="">Selecione um horário</option>
+                            {horariosDisponiveis.map((hora) => (
+                              <option key={hora} value={hora}>
+                                {hora}
+                              </option>
+                            ))}
+                            {horariosOcupados.map((hora) => (
+                              <option key={hora} value={hora} disabled className="text-gray-400">
+                                {hora}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        {horariosDisponiveis.length === 0 && dataExame && !loading.horarios && (
+                          <p className="text-sm text-red-600 mt-1">
+                            Não há horários disponíveis para esta data. Escolha outra data.
+                          </p>
+                        )}
                       </div>
 
                       <div className="md:col-span-2">
@@ -350,7 +423,7 @@ const AgendarExames = () => {
                       
                       <button
                         type="submit"
-                        disabled={loading.agendamento}
+                        disabled={loading.agendamento || horariosDisponiveis.length === 0}
                         className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors font-medium flex items-center shadow-md"
                       >
                         {loading.agendamento ? (

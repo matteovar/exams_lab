@@ -31,3 +31,4 @@ if exame_collection.count_documents({}) == 0:
         print("Exames iniciais cadastrados com sucesso!")
     except Exception as e:
         print(f"Erro ao cadastrar exames iniciais: {str(e)}")
+

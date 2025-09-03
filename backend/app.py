@@ -28,10 +28,11 @@ app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hora em segundos
 
 # Registro de blueprints (rotas)
+# Registro de blueprints (rotas)
 app.register_blueprint(medico_bp, url_prefix="/api/medico")
 app.register_blueprint(usuario_bp, url_prefix="/api/usuario")
 app.register_blueprint(agendamento_bp, url_prefix="/api/agendamento")
-app.register_blueprint(coleta_bp, url_prefix="/api/coleta")
+app.register_blueprint(coleta_bp, url_prefix="/api/coleta")  # ← Esta linha deve existir
 app.register_blueprint(laudo_bp, url_prefix="/api/laudo")
 app.register_blueprint(exames_bp, url_prefix="/api/exames")
 

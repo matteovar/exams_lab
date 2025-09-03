@@ -1,11 +1,56 @@
 from datetime import datetime
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+from datetime import datetime, timedelta 
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import (agendamento_collection, exame_collection, 
                    coleta_collection, laudo_collection, usuario_collection)
 
 agendamento_bp = Blueprint("agendamento", __name__)
+
+@agendamento_bp.route("/agendamentos-do-dia", methods=["GET"])
+@jwt_required()
+def agendamentos_do_dia():
+    try:
+        # Verificar se usuário é médico
+        user = usuario_collection.find_one(
+            {"cpf": get_jwt_identity().split(":")[0], "tipo": "medico"}
+        )
+        if not user:
+            return jsonify({"msg": "Acesso não autorizado"}), 403
+        
+        data_str = request.args.get("data")
+        if not data_str:
+            data_obj = datetime.now()
+        else:
+            data_obj = datetime.strptime(data_str, "%Y-%m-%d")
+        
+        # Buscar agendamentos do dia
+        inicio = datetime(data_obj.year, data_obj.month, data_obj.day, 0, 0, 0)
+        fim = inicio + timedelta(days=1)
+        
+        agendamentos = list(agendamento_collection.find({
+            "data_coleta": {
+                "$gte": inicio,
+                "$lt": fim
+            }
+        }))
+        
+        for ag in agendamentos:
+            ag["_id"] = str(ag["_id"])
+            ag["data_coleta"] = ag["data_coleta"].isoformat()
+            
+            # Adicionar info do paciente
+            paciente = usuario_collection.find_one(
+                {"cpf": ag["cpf_usuario"]},
+                {"nome": 1}
+            )
+            ag["paciente_nome"] = paciente.get("nome", "Não informado")
+        
+        return jsonify(agendamentos), 200
+        
+    except Exception as e:
+        return jsonify({"msg": f"Erro ao buscar agendamentos: {str(e)}"}), 500
 
 @agendamento_bp.route("/exames-disponiveis", methods=["GET"])
 def listar_exames_disponiveis():
@@ -25,6 +70,24 @@ def criar_agendamento():
     if not isinstance(data["exames"], list) or len(data["exames"]) == 0:
         return jsonify({"msg": "Selecione pelo menos um exame"}), 400
     
+    # Verificar se o horário ainda está disponível
+    data_coleta = datetime.fromisoformat(data["data_coleta"])
+    hora_coleta = data_coleta.strftime("%H:%M")
+    
+    # Buscar agendamentos no mesmo horário
+    agendamentos_conflitantes = list(agendamento_collection.find({
+        "data_coleta": {
+            "$gte": datetime(data_coleta.year, data_coleta.month, data_coleta.day, 0, 0, 0),
+            "$lt": datetime(data_coleta.year, data_coleta.month, data_coleta.day, 23, 59, 59)
+        }
+    }))
+    
+    horarios_ocupados = [ag["data_coleta"].strftime("%H:%M") for ag in agendamentos_conflitantes]
+    
+    if hora_coleta in horarios_ocupados:
+        return jsonify({"msg": "Este horário não está mais disponível. Por favor, escolha outro."}), 400
+    
+    # Resto do código permanece o mesmo...
     # Verificar se exames existem e estão ativos
     exames_validos = []
     for exame_id in data["exames"]:
@@ -42,7 +105,7 @@ def criar_agendamento():
     agendamento = {
         "cpf_usuario": cpf_usuario,
         "exames": exames_validos,
-        "data_coleta": datetime.fromisoformat(data["data_coleta"]),
+        "data_coleta": data_coleta,
         "status": "agendado",
         "local_coleta": data.get("local_coleta", "Sede Principal"),
         "data_criacao": datetime.utcnow(),
@@ -180,3 +243,59 @@ def registrar_coleta(agendamento_id):
         return jsonify({"msg": "Coleta registrada com sucesso"}), 200
     except Exception as e:
         return jsonify({"msg": f"Erro ao registrar coleta: {str(e)}"}), 500
+
+@agendamento_bp.route("/verificar-horarios", methods=["POST"])
+def verificar_horarios_disponiveis():
+    try:
+        data = request.get_json()
+        data_agendamento = data.get("data")
+        exames = data.get("exames", [])
+        
+        if not data_agendamento:
+            return jsonify({"error": "Data não informada"}), 400
+        
+        # Converter a data para objeto datetime
+        data_obj = datetime.fromisoformat(data_agendamento.split('T')[0])
+        
+        # Buscar todos os agendamentos para a data específica
+        agendamentos_dia = list(agendamento_collection.find({
+            "data_coleta": {
+                "$gte": datetime(data_obj.year, data_obj.month, data_obj.day, 0, 0, 0),
+                "$lt": datetime(data_obj.year, data_obj.month, data_obj.day, 23, 59, 59)
+            }
+        }))
+        
+        # Horários disponíveis padrão
+        todos_horarios = [
+            "06:00", "06:30",
+            "07:00", "07:30",
+            "08:00", "08:30",
+            "09:00", "09:30",
+            "10:00", "10:30",
+            "11:00", "11:30",
+            "12:00", "12:30",
+            "13:00", "13:30",
+            "14:00", "14:30",
+            "15:00", "15:30",
+            "16:00", "16:30",
+            "17:00", "17:30",
+            "18:00", "18:30",
+            "19:00"
+        ]
+        
+        # Horários ocupados
+        horarios_ocupados = []
+        for agendamento in agendamentos_dia:
+            hora_agendamento = agendamento["data_coleta"].strftime("%H:%M")
+            horarios_ocupados.append(hora_agendamento)
+        
+        # Filtrar horários disponíveis
+        horarios_disponiveis = [hora for hora in todos_horarios if hora not in horarios_ocupados]
+        
+        return jsonify({
+            "disponiveis": horarios_disponiveis,
+            "ocupados": horarios_ocupados
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Erro ao verificar horários: {str(e)}"}), 500
