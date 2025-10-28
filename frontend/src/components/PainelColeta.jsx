@@ -24,7 +24,7 @@ const PainelColeta = () => {
   const fetchColetas = async (tipo) => {
     try {
       setLoading(true);
-      const endpoint = tipo === "hoje" 
+      const endpoint = tipo === "hoje"
         ? "http://localhost:5000/api/coleta/hoje"
         : "http://localhost:5000/api/coleta/pendentes";
 
@@ -64,8 +64,10 @@ const PainelColeta = () => {
         throw new Error(errData.error || "Erro ao confirmar exame");
       }
 
-      fetchColetas(activeTab);
-      
+      // Aguarda o fetchColetas atualizar o estado
+      await fetchColetas(activeTab);
+
+      // Agora sim atualiza a coleta selecionada com base nos dados novos
       if (selectedColeta && selectedColeta._id === agendamentoId) {
         const updatedColeta = coletas.find(c => c._id === agendamentoId);
         if (updatedColeta) setSelectedColeta(updatedColeta);
@@ -97,27 +99,32 @@ const PainelColeta = () => {
           <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setActiveTab("hoje")}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                activeTab === "hoje"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`flex-1 py-2 px-4 rounded-md transition-colors ${activeTab === "hoje"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
             >
               <Calendar className="inline mr-2 w-4 h-4" />
               Coletas de Hoje
             </button>
+
             <button
               onClick={() => setActiveTab("pendentes")}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                activeTab === "pendentes"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`flex-1 py-2 px-4 rounded-md transition-colors ${activeTab === "pendentes"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
             >
               <AlertCircle className="inline mr-2 w-4 h-4" />
-              Pendentes
+              Pendentes{" "}
+              {estatisticas.pendentes > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-500 rounded-full">
+                  {estatisticas.pendentes}
+                </span>
+              )}
             </button>
           </div>
+
 
           {/* Estatísticas */}
           {activeTab === "hoje" && coletas.length > 0 && (
@@ -160,8 +167,8 @@ const PainelColeta = () => {
 
                 {coletas.length === 0 ? (
                   <div className="bg-white p-8 rounded-lg shadow text-center">
-                    {activeTab === "hoje" 
-                      ? "Nenhuma coleta agendada para hoje" 
+                    {activeTab === "hoje"
+                      ? "Nenhuma coleta agendada para hoje"
                       : "Nenhuma coleta pendente no momento"}
                   </div>
                 ) : (
@@ -176,18 +183,17 @@ const PainelColeta = () => {
                         <div className="col-span-2">Status</div>
                       </div>
                     </div>
-                    
+
                     {/* Lista com scroll vertical */}
                     <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
                       {coletas.map((coleta) => (
                         <div
                           key={coleta._id}
                           onClick={() => setSelectedColeta(coleta)}
-                          className={`p-4 border-b cursor-pointer transition-all hover:bg-gray-50 ${
-                            selectedColeta?._id === coleta._id
-                              ? "bg-blue-50 border-l-4 border-blue-500"
-                              : "bg-white"
-                          }`}
+                          className={`p-4 border-b cursor-pointer transition-all hover:bg-gray-50 ${selectedColeta?._id === coleta._id
+                            ? "bg-blue-50 border-l-4 border-blue-500"
+                            : "bg-white"
+                            }`}
                         >
                           <div className="grid grid-cols-12 gap-4 items-center">
                             {/* Paciente */}
@@ -195,23 +201,23 @@ const PainelColeta = () => {
                               <h3 className="font-medium text-gray-900">{coleta.paciente_nome}</h3>
                               <p className="text-sm text-gray-600 truncate">{coleta.paciente_telefone || "Sem telefone"}</p>
                             </div>
-                            
+
                             {/* Horário */}
                             <div className="col-span-2">
                               <p className="text-sm font-medium text-gray-900">{coleta.horario_formatado}</p>
                               <p className="text-xs text-gray-600">{coleta.data_formatada}</p>
                             </div>
-                            
+
                             {/* Local */}
                             <div className="col-span-2">
                               <p className="text-sm text-gray-600 truncate">{coleta.local_coleta}</p>
                             </div>
-                            
+
                             {/* Progresso */}
                             <div className="col-span-2">
                               <div className="flex items-center gap-2">
                                 <div className="w-full bg-gray-200 rounded-full h-2">
-                                  <div 
+                                  <div
                                     className="bg-blue-600 h-2 rounded-full transition-all"
                                     style={{ width: `${coleta.progresso}%` }}
                                   ></div>
@@ -221,14 +227,13 @@ const PainelColeta = () => {
                                 </span>
                               </div>
                             </div>
-                            
+
                             {/* Status */}
                             <div className="col-span-2">
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                coleta.todos_concluidos 
-                                  ? "bg-green-100 text-green-800" 
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}>
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${coleta.todos_concluidos
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                                }`}>
                                 {coleta.todos_concluidos ? "Concluído" : "Pendente"}
                               </span>
                             </div>
@@ -274,11 +279,10 @@ const PainelColeta = () => {
 
                       <div>
                         <h4 className="text-sm font-medium text-gray-500">Status:</h4>
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          selectedColeta.todos_concluidos 
-                            ? "bg-green-100 text-green-800" 
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}>
+                        <span className={`px-2 py-1 rounded text-sm ${selectedColeta.todos_concluidos
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                          }`}>
                           {selectedColeta.todos_concluidos ? "Concluído" : "Pendente"}
                         </span>
                       </div>
