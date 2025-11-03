@@ -1,39 +1,83 @@
 # Projeto de Analise Laboratorial (TCC)
 
-#### Nesse projeto o grupo ira abordar um software para Analise de Exames para Laboratorios.
+#### Este projeto tem como objetivo desenvolver um software para análise e gestão de exames laboratoriais, integrando um backend em Flask (Python) e um frontend moderno em React.
 
-## Linguagens Usadas:
+# Linguagens Usadas:
+#### Frontend
+* React (JavaScript + Vite)
+
+* CSS / Tailwind (ou outro framework caso aplicável)
+
+#### Backend
+
 * Python
-* HTML
-* CSS
-* SQLite
-* Java Script
-* Frameswork:
-    * Flask
+
+* Flask
+
+* MongoDB
 
 
-## Como inicalizar o projeto
+# ⚠️ Importante:
+#### Para executar o projeto corretamente, mantenha dois terminais abertos:
 
-1. Clone o Repositorio.
+#### Um rodando o backend (Flask)
+
+#### Outro rodando o frontend (React)
+
+# Como inicalizar o projeto
+
+### 1. Clone o Repositorio.
 ```
 git clone https://github.com/matteovar/exams_lab.git
+cd exams_lab
 ```
+### 2. Configurar o ambiente do backend ⚙️ (Flask)
+1. Crie e ative um ambiente virtual:
+    ```
+    python -m venv **nome da sua venv**
+    ```
+    * Windows:
+        ```
+        venv\Scripts\activate
+        ```
+    * Linux/Mac:
+        ```
+        source venv/bin/activate
+        ```
 
-2. Apos clonar o repositorio, instale todas as bibliotecas que estao no requirements.txt
+2. Instale todas as bibliotecas que estao no requirements.txt
 
-````
-pip install -r requirements.txt
-`````
+    ````
+    pip install -r backend/requirements.txt
+    ````
 
-3. Apos a intalacao, navegue ate a pasta do arquivo ```app.py```
+3. Execute o servidor Flask:
+    ```
+    cd backend
+    python app.py
+    ```
 
-```
-cd app
-```
-4. Rode o ```app.py``` por linha de comando ou cique em  <img src="https://github.com/user-attachments/assets/20dbcf1b-e3ea-4f37-af56-c90e8be91866" width="28" alt="Image" style="padding-top: 10px; padding-left: 10px; padding-right: 10px"> no Visual Code
+### 3. Configurar o ambiente do frontend 🖥️ (React)
 
+1. Acesse a pasta do frontend:
+    ```
+    cd frontend
+    ```
+2. Instale as dependências:
 
+    ```
+    npm install
+    ```
 
-```
-python app.py
-```
+3. Inicie o servidor de desenvolvimento:
+
+    ```
+    npm run dev
+    ```
+
+# Requisitos
+* Python 3.10+
+
+* Node.js 18+
+
+* npm ou yarn
