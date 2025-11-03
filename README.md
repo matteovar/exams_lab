@@ -45,15 +45,21 @@ cd exams_lab
         source venv/bin/activate
         ```
 
-2. Instale todas as bibliotecas que estao no requirements.txt
+2. Acesse a pasta
+
+    ```
+    cd backend
+    ```
+
+3. Instale todas as bibliotecas que estao no requirements.txt
 
     ````
     pip install -r backend/requirements.txt
     ````
 
-3. Execute o servidor Flask:
+4. Execute o servidor Flask:
     ```
-    cd backend
+    
     python app.py
     ```
 
