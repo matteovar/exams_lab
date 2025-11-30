@@ -12,6 +12,18 @@ import traceback
 
 agendamento_bp = Blueprint("agendamento", __name__)
 
+def to_serializable(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, dict):
+        return {k: to_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [to_serializable(i) for i in obj]
+    return obj
+
+
 # ===========================================================
 # Funções auxiliares: Envio para Painel e HL7
 # ===========================================================
@@ -19,24 +31,30 @@ agendamento_bp = Blueprint("agendamento", __name__)
 def enviar_agendamento_painel_coleta(agendamento_id, paciente_info, exames_pedidos, data_coleta):
     """Envia os dados do agendamento para o painel de coleta."""
     try:
-        url_painel = os.environ.get("PAINEL_COLETA_ENDPOINT", "http://localhost:5000/painel-coleta")
+        url_painel = os.environ.get("PAINEL_COLETA_ENDPOINT", "http://localhost:5000/api/coleta/painel-coleta")
 
+
+        # 🔥 SERIALIZAÇÃO OBRIGATÓRIA
         payload = {
             "agendamento_id": str(agendamento_id),
-            "paciente": paciente_info,
-            "exames": exames_pedidos,
+            "paciente": to_serializable(paciente_info),
+            "exames": to_serializable(exames_pedidos),
             "data_coleta": data_coleta.strftime("%Y-%m-%d %H:%M:%S")
         }
+
+        print("\n==== PAYLOAD ENVIADO ====")
+        print(payload)
+        print("==========================\n")
 
         response = requests.post(url_painel, json=payload, timeout=10)
 
         if response.status_code == 200:
             print(f"✅ Agendamento {agendamento_id} enviado com sucesso para o painel-coleta.")
         else:
-            print(f"⚠️ Erro ao enviar agendamento {agendamento_id} para painel-coleta: HTTP {response.status_code} - {response.text}")
+            print(f"⚠️ Erro ao enviar agendamento {agendamento_id}: HTTP {response.status_code} - {response.text}")
 
     except Exception as e:
-        print(f"❌ Erro ao enviar agendamento {agendamento_id} para painel-coleta: {e}")
+        print(f"❌ Erro ao enviar agendamento {agendamento_id}: {e}")
         traceback.print_exc()
 
 
@@ -45,7 +63,7 @@ def enviar_pedido_hl7_http(agendamento_id, paciente_info, exames_pedidos, data_c
     try:
         url_lis = os.environ.get(
             "LIS_HL7_ENDPOINT",
-            "https://webhook.site/ece1e84b-6dcd-4a48-8fba-9fd319fa1bab"
+            "https://webhook.site/18ab0ede-223c-4613-8bb0-66ec4ffc7000"
         )
 
         data_hora_msg = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -181,7 +199,9 @@ def criar_agendamento():
         novo_agendamento_id = result.inserted_id
 
         paciente = usuario_collection.find_one({"cpf": cpf_usuario}) or {}
-
+        # 🔥 SERIALIZAÇÃO AQUI (ESSENCIAL)
+        paciente = to_serializable(paciente)
+        exames_validos = to_serializable(exames_validos)
         # ✅ Envia automaticamente o agendamento para o painel e para o LIS (HL7)
         try:
             enviar_agendamento_painel_coleta(novo_agendamento_id, paciente, exames_validos, data_coleta)

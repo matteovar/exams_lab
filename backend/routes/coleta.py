@@ -193,3 +193,17 @@ def listar_coletas_hoje():
     except Exception as e:
         print(f"Error in listar_coletas_hoje: {str(e)}")
         return jsonify({"error": "Erro interno ao buscar coletas de hoje"}), 500
+    
+@coleta_bp.route("/painel-coleta", methods=["POST"])
+def receber_painel_coleta():
+    try:
+        data = request.get_json()
+
+        print("\n📥 Webhook recebido do agendamento:")
+        print(data)
+
+        return jsonify({"message": "Webhook recebido com sucesso"}), 200
+
+    except Exception as e:
+        print(f"Erro no webhook painel-coleta: {str(e)}")
+        return jsonify({"error": str(e)}), 500
